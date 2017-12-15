@@ -183,9 +183,9 @@ class Codegen {
 	private static void staticGen(String cacheKey, String source) throws IOException {
 		createDir(cacheKey);
 		String fileName = cacheKey.replace('.', '/') + ".java";
-
+		FileOutputStream fileOutputStream = null;
 		try {
-			FileOutputStream fileOutputStream = new FileOutputStream(new File(isDoingStaticCodegen.outputDir, fileName));
+			fileOutputStream = new FileOutputStream(new File(isDoingStaticCodegen.outputDir, fileName));
 			OutputStreamWriter writer = new OutputStreamWriter(fileOutputStream);
 			try {
 				staticGen(cacheKey, writer, source);
