@@ -61,7 +61,8 @@ class IterImplForStreaming {
 	final static void skipArray(JsonIterator iter) throws IOException {
 		int level = 1;
 		for (;;) {
-			for (int i = iter.head; i < iter.tail; i++) {
+			int i = iter.head;
+			while (i < iter.tail) {
 				switch (iter.buf[i]) {
 				case '"': // If inside string, skip it
 					iter.head = i + 1;
@@ -83,6 +84,7 @@ class IterImplForStreaming {
 				default:
 					break;
 				}
+				i++;
 			}
 			if (!loadMore(iter)) {
 				return;
@@ -93,7 +95,8 @@ class IterImplForStreaming {
 	final static void skipObject(JsonIterator iter) throws IOException {
 		int level = 1;
 		for (;;) {
-			for (int i = iter.head; i < iter.tail; i++) {
+			int i = iter.head;
+			while (i < iter.tail) {
 				switch (iter.buf[i]) {
 				case '"': // If inside string, skip it
 					iter.head = i + 1;
@@ -115,6 +118,7 @@ class IterImplForStreaming {
 				default:
 					break;
 				}
+				i++;
 			}
 			if (!loadMore(iter)) {
 				return;
@@ -492,7 +496,8 @@ class IterImplForStreaming {
 	}
 
 	static long readLongSlowPath(final JsonIterator iter, long value) throws IOException {
-		value = -value; // add negatives to avoid redundant checks for Long.MIN_VALUE on each iteration
+		value = -value; // add negatives to avoid redundant checks for
+						// Long.MIN_VALUE on each iteration
 		long multmin = -922337203685477580L; // limit / 10
 		for (;;) {
 			for (int i = iter.head; i < iter.tail; i++) {
@@ -517,7 +522,8 @@ class IterImplForStreaming {
 	}
 
 	static int readIntSlowPath(final JsonIterator iter, int value) throws IOException {
-		value = -value; // add negatives to avoid redundant checks for Integer.MIN_VALUE on each
+		value = -value; // add negatives to avoid redundant checks for
+						// Integer.MIN_VALUE on each
 						// iteration
 		int multmin = -214748364; // limit / 10
 		for (;;) {

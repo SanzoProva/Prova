@@ -263,8 +263,7 @@ public class GsonCompatibilityMode extends Config {
 					String value = (String) obj;
 					stream.write('"');
 					int _surrogate;
-
-					int i = 0;
+					int i = 0; 
 					while (i < value.length()) {
 						int c = value.charAt(i);
 						String replacement;
@@ -290,15 +289,18 @@ public class GsonCompatibilityMode extends Config {
 									continue;
 								}
 								// Yup, a surrogate:
-								if (c > SURR1_LAST) { // must be from first range
+								if (c > SURR1_LAST) { // must be from first
+														// range
 									throw new JsonException("illegalSurrogate");
 								}
 								_surrogate = c;
-								// and if so, followed by another from next range
-								if (i >= value.length()) { // unless we hit the end?
+								// and if so, followed by another from next
+								// range
+								if (i >= value.length()) { // unless we hit the
+															// end?
 									break;
 								}
-								i++;
+								i++; 
 								c = value.charAt(i);
 								int firstPart = _surrogate;
 								_surrogate = 0;
@@ -309,7 +311,8 @@ public class GsonCompatibilityMode extends Config {
 													+ ", second 0x" + Integer.toHexString(c) + "; illegal combination");
 								}
 								c = 0x10000 + ((firstPart - SURR1_FIRST) << 10) + (c - SURR2_FIRST);
-								if (c > 0x10FFFF) { // illegal in JSON as well as in XML
+								if (c > 0x10FFFF) { // illegal in JSON as well
+													// as in XML
 									throw new JsonException("illegalSurrogate");
 								}
 								stream.write((byte) (0xf0 | (c >> 18)), (byte) (0x80 | ((c >> 12) & 0x3f)),
@@ -317,8 +320,7 @@ public class GsonCompatibilityMode extends Config {
 							}
 						}
 						i++;
-					} // end while
-
+					}
 					stream.write('"');
 				}
 			};

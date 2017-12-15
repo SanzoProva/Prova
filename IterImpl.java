@@ -43,7 +43,8 @@ class IterImpl {
 
 	final static void skipArray(JsonIterator iter) throws IOException {
 		int level = 1;
-		for (int i = iter.head; i < iter.tail; i++) {
+		int i = iter.head;
+		while (i < iter.tail) {
 			switch (iter.buf[i]) {
 			case '"': // If inside string, skip it
 				iter.head = i + 1;
@@ -65,13 +66,15 @@ class IterImpl {
 			default:
 				break;
 			}
+			i++;
 		}
 		throw iter.reportError("skipArray", "incomplete array");
 	}
 
 	final static void skipObject(JsonIterator iter) throws IOException {
 		int level = 1;
-		for (int i = iter.head; i < iter.tail; i++) {
+		int i = iter.head;
+		while (i < iter.tail) {
 			switch (iter.buf[i]) {
 			case '"': // If inside string, skip it
 				iter.head = i + 1;
@@ -93,6 +96,7 @@ class IterImpl {
 			default:
 				break;
 			}
+			i++;
 		}
 		throw iter.reportError("skipObject", "incomplete object");
 	}
@@ -457,7 +461,8 @@ class IterImpl {
 		int oldHead = iter.head;
 		try {
 			try {
-				long value = IterImplNumber.readLong(iter); // without the dot & sign
+				long value = IterImplNumber.readLong(iter); // without the dot &
+															// sign
 				if (iter.head == iter.tail) {
 					return value;
 				}
