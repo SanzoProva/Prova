@@ -178,8 +178,8 @@ class Codegen {
     private static void staticGen(Class clazz, String cacheKey, CodegenResult source) throws IOException {
         createDir(cacheKey);
         String fileName = cacheKey.replace('.', '/') + ".java";
-        FileOutputStream fileOutputStream = new FileOutputStream(new File(isDoingStaticCodegen.outputDir, fileName));
         try {
+        	FileOutputStream fileOutputStream = new FileOutputStream(new File(isDoingStaticCodegen.outputDir, fileName));
             OutputStreamWriter writer = new OutputStreamWriter(fileOutputStream);
             try {
                 staticGen(clazz, cacheKey, writer, source);
