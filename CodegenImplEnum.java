@@ -32,7 +32,11 @@ class CodegenImplEnum {
 			}
 			for (int i = 0; i < fromNameBytes.length - 1; i++) {
 				byte b = fromNameBytes[i];
-				Map<Byte, Object> next = (Map<Byte, Object>) current.get(b);
+				if (current.get(b) instanceof Map<Byte, Object>) {
+					Map<Byte, Object> next = (Map<Byte, Object>) current.get(b);
+				} else {
+					return new Exception();
+				}
 				if (next == null) {
 					next = new HashMap<Byte, Object>();
 					current.put(b, next);
