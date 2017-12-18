@@ -90,6 +90,7 @@ abstract class Base64 {
 	private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
 	static final byte[] BA;
 	static final int[] IA = new int[256];
+	static String s;
 	static {
 		Arrays.fill(IA, -1);
 		for (int i = 0, iS = CA.length; i < iS; i++) {
@@ -98,11 +99,9 @@ abstract class Base64 {
 		IA['='] = 0;
 		BA = new byte[CA.length];
 		for (int i = 0; i < CA.length; i++) {
-			if(CA[i] instanceof byte) {
-				BA[i] = (byte) CA[i];
-			}else {
-				throw new Exception();
-			}
+			Character c = CA[i];
+			s = c.toString();
+			BA[i] = Byte.parseByte(s);
 		}
 	}
 
