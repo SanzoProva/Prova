@@ -21,10 +21,17 @@ class CodegenImplEnum {
 		Map<Integer, Object> trieTree = new HashMap<Integer, Object>();
 		for (Object e : allConsts) {
 			byte[] fromNameBytes = e.toString().getBytes();
-			if (trieTree.get(fromNameBytes.length) instanceof Map<Byte, Object>) {
-				Map<Byte, Object> current = (Map<Byte, Object>) trieTree.get(fromNameBytes.length);
-			} else {
-				throw new Exception();
+			Map<Byte, Object> current = null;
+			try {
+				if (trieTree.get(fromNameBytes.length) instanceof Map<?, ?>) {
+					current = (Map<Byte, Object>) trieTree.get(fromNameBytes.length);
+				} else {
+					throw new Exception();
+				}
+			} catch (Exception e1) {
+				System.out.println("Exception " + e1);
+			} finally {
+				System.out.print("");
 			}
 			if (current == null) {
 				current = new HashMap<Byte, Object>();
