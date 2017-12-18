@@ -173,7 +173,8 @@ abstract class Base64 {
 		byte b2 = BA[(i >>> 12) & 0x3f];
 		byte b3 = BA[(i >>> 6) & 0x3f];
 		byte b4 = BA[i & 0x3f];
-		stream.write((byte) '"', b1, b2, b3, b4);
+		Character c  = '"';
+		stream.write(c.toString().getBytes().clone()[0], b1, b2, b3, b4);
 		bits = bits >>> 24;
 		i = (int) bits;
 		b1 = BA[(i >>> 18) & 0x3f];
