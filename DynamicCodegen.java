@@ -23,8 +23,10 @@ class DynamicCodegen {
 		if (ctClass.toClass() instanceof Decoder) {
 			decoder = (Decoder) ctClass.toClass().newInstance();
 			return decoder;
-		} else
+		} else {
 			throw new Exception();
+		}
+			
 	}
 
 	public static void enableStreamingSupport() throws Exception {
