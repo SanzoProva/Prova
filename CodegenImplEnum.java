@@ -81,7 +81,11 @@ class CodegenImplEnum {
 				append(lines, "}");
 				continue;
 			}
-			Map<Byte, Object> next = (Map<Byte, Object>) entry.getValue();
+			if (entry.getValue() instanceof Map<Byte, Object>) {
+				Map<Byte, Object> next = (Map<Byte, Object>) entry.getValue();
+			} else {
+				throw new Exception();
+			}
 			if (next.size() == 1) {
 				ArrayList<Byte> nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
 				nextBytesToCompare.add(b);
