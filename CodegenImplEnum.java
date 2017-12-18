@@ -39,10 +39,17 @@ class CodegenImplEnum {
 			}
 			for (int i = 0; i < fromNameBytes.length - 1; i++) {
 				byte b = fromNameBytes[i];
-				if (current.get(b) instanceof Map<Byte, Object>) {
-					Map<Byte, Object> next = (Map<Byte, Object>) current.get(b);
-				} else {
-					return new Exception();
+				Map<Byte, Object> next = null;
+				try {
+					if (current.get(b) instanceof Map<?, ?>) {
+						next = (Map<Byte, Object>) current.get(b);
+					} else {
+						throw new Exception();
+					}
+				} catch (Exception e1) {
+					System.out.println("Exception " + e1);
+				} finally {
+					System.out.print("");
 				}
 				if (next == null) {
 					next = new HashMap<Byte, Object>();
@@ -60,10 +67,17 @@ class CodegenImplEnum {
 		for (Map.Entry<Integer, Object> entry : trieTree.entrySet()) {
 			Integer len = entry.getKey();
 			append(switchBody, "case " + len + ": ");
-			if (entry.getValue() instanceof Map<Byte, Object>) {
-				Map<Byte, Object> current = (Map<Byte, Object>) entry.getValue();
-			} else {
-				throw new Exception();
+			Map<Byte, Object> current = null;
+			try {
+				if (entry.getValue() instanceof Map<?, ?>) {
+					current = (Map<Byte, Object>) entry.getValue();
+				} else {
+					throw new Exception();
+				}
+			} catch (Exception e1) {
+				System.out.println("Exception " + e1);
+			} finally {
+				System.out.print("");
 			}
 			addFieldDispatch(switchBody, len, 0, current, new ArrayList<Byte>());
 			append(switchBody, "break;");
@@ -88,11 +102,7 @@ class CodegenImplEnum {
 				append(lines, "}");
 				continue;
 			}
-			if (entry.getValue() instanceof Map<Byte, Object>) {
-				Map<Byte, Object> next = (Map<Byte, Object>) entry.getValue();
-			} else {
-				throw new Exception();
-			}
+			Map<Byte, Object> next = (Map<Byte, Object>) entry.getValue();
 			if (next.size() == 1) {
 				ArrayList<Byte> nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
 				nextBytesToCompare.add(b);
