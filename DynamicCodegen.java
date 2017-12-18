@@ -20,8 +20,9 @@ class DynamicCodegen {
 		CtMethod interfaceMethod = CtNewMethod.make(
 				"" + "public Object decode(com.jsoniter.JsonIterator iter) {" + "return decode_(iter);" + "}", ctClass);
 		ctClass.addMethod(interfaceMethod);
-		if (ctClass instanceof Decoder) {
-			decoder = (Decoder) ctClass.toClass().newInstance();
+		Object o = ctClass.toClass().newInstance();
+		if (o instanceof Decoder) {
+			decoder = (Decoder) o;
 			return decoder;
 		} else {
 			throw new Exception();
