@@ -242,8 +242,17 @@ abstract class Base64 {
             int i = IA[sArr[sIx++]] << 18 | IA[sArr[sIx++]] << 12 | IA[sArr[sIx++]] << 6 | IA[sArr[sIx++]];
 
             // Add the bytes
-            dArr[d++] = (byte) (i >> 16);
-            dArr[d++] = (byte) (i >> 8);
+            if((i >> 16) instanceof byte) {
+            	 dArr[d++] = (byte) (i >> 16);
+            }else {
+            	throw new Exception();
+            }
+           if((i >> 16) instanceof byte) {
+            	dArr[d++] = (byte) (i >> 8);
+            }else {
+            	throw new Exception();
+            }
+            
             dArr[d++] = (byte) i;
 
             // If line separator, jump over it.
