@@ -98,7 +98,11 @@ abstract class Base64 {
 		IA['='] = 0;
 		BA = new byte[CA.length];
 		for (int i = 0; i < CA.length; i++) {
-			BA[i] = (byte) CA[i];
+			if(CA[i] instanceof byte) {
+				BA[i] = (byte) CA[i];
+			}else {
+				throw new Exception();
+			}
 		}
 	}
 
@@ -158,7 +162,12 @@ abstract class Base64 {
 			int i = ((sArr[eLen] & 0xff) << 10) | (left == 2 ? ((sArr[sLen - 1] & 0xff) << 2) : 0);
 
 			// Set last four chars
-			stream.write(BA[i >> 12], BA[(i >>> 6) & 0x3f], left == 2 ? BA[i & 0x3f] : (byte) '=', (byte) '=');
+			if('=' instanceof byte) {
+				stream.write(BA[i >> 12], BA[(i >>> 6) & 0x3f], left == 2 ? BA[i & 0x3f] : (byte) '=', (byte) '=');
+			}else {
+				throw new Exception();
+			}
+			
 		}
 
 		return dLen;
@@ -170,7 +179,11 @@ abstract class Base64 {
 		byte b2 = BA[(i >>> 12) & 0x3f];
 		byte b3 = BA[(i >>> 6) & 0x3f];
 		byte b4 = BA[i & 0x3f];
-		stream.write((byte) '"', b1, b2, b3, b4);
+		if('"' instanceof byte) {
+			stream.write((byte) '"', b1, b2, b3, b4);
+		}else {
+			throw new Exception();
+		}
 		bits = bits >>> 24;
 		i = (int) bits;
 		b1 = BA[(i >>> 18) & 0x3f];
@@ -183,7 +196,12 @@ abstract class Base64 {
 		b1 = BA[i >> 12];
 		b2 = BA[(i >>> 6) & 0x3f];
 		b3 = BA[i & 0x3f];
-		stream.write(b1, b2, b3, (byte) '"');
+		if('"' instanceof byte) {
+			stream.write(b1, b2, b3, (byte) '"');
+		}else {
+			throw new Exception();
+		}
+		
 	}
 
 	static long decodeLongBits(JsonIterator iter) throws IOException {
@@ -247,7 +265,7 @@ abstract class Base64 {
             }else {
             	throw new Exception();
             }
-           if((i >> 16) instanceof byte) {
+           if((i >> 8) instanceof byte) {
             	dArr[d++] = (byte) (i >> 8);
             }else {
             	throw new Exception();
