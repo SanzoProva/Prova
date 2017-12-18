@@ -127,7 +127,7 @@ class IterImplForStreaming {
 	}
 
 	final static void skipString(JsonIterator iter) throws IOException {
-		for (;;) {
+		for (;;) { 
 			int end = IterImplSkip.findStringEnd(iter);
 			if (end == -1) {
 				int j = iter.tail - 1;
