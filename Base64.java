@@ -87,7 +87,8 @@ abstract class Base64 {
         IA['='] = 0;
         BA = new byte[CA.length];
         for (int i = 0; i < CA.length; i++) {
-            BA[i] = (byte)CA[i];
+        	Character c = CA[i];
+			BA[i] = c.toString().getBytes().clone()[0];
         }
     }
 
