@@ -53,7 +53,11 @@ class CodegenImplEnum {
 		for (Map.Entry<Integer, Object> entry : trieTree.entrySet()) {
 			Integer len = entry.getKey();
 			append(switchBody, "case " + len + ": ");
-			Map<Byte, Object> current = (Map<Byte, Object>) entry.getValue();
+			if (entry.getValue() instanceof Map<Byte, Object>) {
+				Map<Byte, Object> current = (Map<Byte, Object>) entry.getValue();
+			} else {
+				throw new Exception();
+			}
 			addFieldDispatch(switchBody, len, 0, current, new ArrayList<Byte>());
 			append(switchBody, "break;");
 		}
