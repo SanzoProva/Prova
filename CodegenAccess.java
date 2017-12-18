@@ -84,7 +84,7 @@ public class CodegenAccess {
 	}
 
 	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException {
-		return (T) Codegen.getDecoder(cacheKey, null).decode(iter);
+		return Codegen.getDecoder(cacheKey, null).decode(iter) instanceof Object ? ((T) Codegen.getDecoder(cacheKey, null).decode(iter)) : null;
 	}
 
 	public static boolean readArrayStart(JsonIterator iter) throws IOException {
@@ -110,7 +110,7 @@ public class CodegenAccess {
 			iter.unreadByte();
 			return true;
 		}
-		throw iter.reportError("readObjectStart", "expect { or n, found: " + (char) c);
+		throw iter.reportError("readObjectStart", "expect { or n, found: " + Byte.toString(c).charAt(0));
 	}
 
 	public static void reportIncompleteObject(JsonIterator iter) {
