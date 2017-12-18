@@ -187,7 +187,6 @@ abstract class Base64 {
 		b1 = BA[i >> 12];
 		b2 = BA[(i >>> 6) & 0x3f];
 		b3 = BA[i & 0x3f];
-		Character c = '"';
 		stream.write(b1, b2, b3, c.toString().getBytes().clone()[0]);
 	}
 
@@ -267,9 +266,11 @@ abstract class Base64 {
 			for (int j = 0; sIx <= eIx - pad; j++)
 				i |= IA[sArr[sIx++]] << (18 - j * 6);
 
-			for (int r = 16; d < len; r -= 8)
+			for (int r = 16; d < len; r -= 8) {
 				intero = i >> r;
-			dArr[d++] = intero.toString().getBytes().clone()[0];
+				dArr[d++] = intero.toString().getBytes().clone()[0];
+			}
+				
 		}
 
 		return dArr;
