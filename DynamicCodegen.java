@@ -20,13 +20,13 @@ class DynamicCodegen {
 		CtMethod interfaceMethod = CtNewMethod.make(
 				"" + "public Object decode(com.jsoniter.JsonIterator iter) {" + "return decode_(iter);" + "}", ctClass);
 		ctClass.addMethod(interfaceMethod);
-		if (ctClass.toClass() instanceof Decoder) {
+		if (ctClass instanceof Decoder) {
 			decoder = (Decoder) ctClass.toClass().newInstance();
 			return decoder;
 		} else {
 			throw new Exception();
 		}
-			
+
 	}
 
 	public static void enableStreamingSupport() throws Exception {
