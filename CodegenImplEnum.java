@@ -102,7 +102,18 @@ class CodegenImplEnum {
 				append(lines, "}");
 				continue;
 			}
-			Map<Byte, Object> next = (Map<Byte, Object>) entry.getValue();
+			Map<Byte, Object> next = null;
+			try {
+				if (entry.getValue() instanceof Map<?, ?>) {
+					next = (Map<Byte, Object>) entry.getValue();
+				} else {
+					throw new Exception();
+				}
+			} catch (Exception e1) {
+				System.out.println("Exception " + e1);
+			} finally {
+				System.out.print("");
+			}
 			if (next.size() == 1) {
 				ArrayList<Byte> nextBytesToCompare = new ArrayList<Byte>(bytesToCompare);
 				nextBytesToCompare.add(b);
