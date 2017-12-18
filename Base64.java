@@ -159,7 +159,9 @@ abstract class Base64 {
 			int i = ((sArr[eLen] & 0xff) << 10) | (left == 2 ? ((sArr[sLen - 1] & 0xff) << 2) : 0);
 
 			// Set last four chars
-			stream.write(BA[i >> 12], BA[(i >>> 6) & 0x3f], left == 2 ? BA[i & 0x3f] : (byte) '=', (byte) '=');
+			Character c = '=';
+			byte ch = c.toString().getBytes().clone()[0];
+			stream.write(BA[i >> 12], BA[(i >>> 6) & 0x3f], left == 2 ? BA[i & 0x3f] : ch, ch);
 		}
 
 		return dLen;
@@ -184,7 +186,8 @@ abstract class Base64 {
 		b1 = BA[i >> 12];
 		b2 = BA[(i >>> 6) & 0x3f];
 		b3 = BA[i & 0x3f];
-		stream.write(b1, b2, b3, (byte) '"');
+		Character c = '"';
+		stream.write(b1, b2, b3, c.toString().getBytes().clone()[0]);
 	}
 
 	static long decodeLongBits(JsonIterator iter) throws IOException {
@@ -212,7 +215,7 @@ abstract class Base64 {
 
 	private final static byte[] EMPTY_ARRAY = new byte[0];
 	static Integer intero = null;
-	
+
 	static byte[] decodeFast(final byte[] sArr, final int start, final int end) {
 		// Check special case
 		int sLen = end - start;
@@ -244,8 +247,10 @@ abstract class Base64 {
 			int i = IA[sArr[sIx++]] << 18 | IA[sArr[sIx++]] << 12 | IA[sArr[sIx++]] << 6 | IA[sArr[sIx++]];
 
 			// Add the bytes
-			dArr[d++] = (byte) (i >> 16);
-			dArr[d++] = (byte) (i >> 8);
+			intero = i >> 16;
+			dArr[d++] = intero.toString().getBytes().clone()[0];
+			intero = i >> 8;
+			dArr[d++] = intero.toString().getBytes().clone()[0];
 			dArr[d++] = (byte) i;
 
 			// If line separator, jump over it.
@@ -262,7 +267,7 @@ abstract class Base64 {
 				i |= IA[sArr[sIx++]] << (18 - j * 6);
 
 			for (int r = 16; d < len; r -= 8)
-				intero = i>>r;
+				intero = i >> r;
 			dArr[d++] = intero.toString().getBytes().clone()[0];
 		}
 
