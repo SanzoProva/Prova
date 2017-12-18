@@ -260,7 +260,7 @@ abstract class Base64 {
                 i |= IA[sArr[sIx++]] << (18 - j * 6);
 
             for (int r = 16; d < len; r -= 8)
-                if(i>>r instanceof byte) {
+                if((i>>r) instanceof byte) {
                 	dArr[d++] = (byte) (i >> r);
                 }else {
                 	throw new Exception();
