@@ -107,7 +107,7 @@ public class CodegenAccess {
 		}
 	}
 
-	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException {
+	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException, RuntimeException{
 		return ((T) Codegen.getDecoder(cacheKey, null).decode(iter));
 	}
 
