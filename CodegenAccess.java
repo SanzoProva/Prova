@@ -108,11 +108,7 @@ public class CodegenAccess {
 	}
 
 	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException {
-		if (Codegen.getDecoder(cacheKey, null).decode(iter) instanceof Object) {
-			return ((T) Codegen.getDecoder(cacheKey, null).decode(iter));
-		} else {
-			throw new IOException();
-		}
+		return ((T) Codegen.getDecoder(cacheKey, null).decode(iter));
 	}
 
 	public static boolean readArrayStart(JsonIterator iter) throws IOException {
