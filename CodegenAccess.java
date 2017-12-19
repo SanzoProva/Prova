@@ -60,27 +60,51 @@ public class CodegenAccess {
 	}
 
 	public static final boolean readBoolean(String cacheKey, JsonIterator iter) throws IOException {
-		return ((Decoder.BooleanDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeBoolean(iter);
+		if (JsoniterSpi.getDecoder(cacheKey) instanceof Decoder.BooleanDecoder) {
+			return ((Decoder.BooleanDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeBoolean(iter);
+		} else {
+			throw new IOException();
+		}
 	}
 
 	public static final short readShort(String cacheKey, JsonIterator iter) throws IOException {
-		return ((Decoder.ShortDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeShort(iter);
+		if (JsoniterSpi.getDecoder(cacheKey) instanceof Decoder.ShortDecoder) {
+			return ((Decoder.ShortDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeShort(iter);
+		} else {
+			throw new IOException();
+		}
 	}
 
 	public static final int readInt(String cacheKey, JsonIterator iter) throws IOException {
-		return ((Decoder.IntDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeInt(iter);
+		if (JsoniterSpi.getDecoder(cacheKey) instanceof Decoder.IntDecoder) {
+			return ((Decoder.IntDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeInt(iter);
+		} else {
+			throw new IOException();
+		}
 	}
 
 	public static final long readLong(String cacheKey, JsonIterator iter) throws IOException {
-		return ((Decoder.LongDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeLong(iter);
+		if (JsoniterSpi.getDecoder(cacheKey) instanceof Decoder.LongDecoder) {
+			return ((Decoder.LongDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeLong(iter);
+		} else {
+			throw new IOException();
+		}
 	}
 
 	public static final float readFloat(String cacheKey, JsonIterator iter) throws IOException {
-		return ((Decoder.FloatDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeFloat(iter);
+		if (JsoniterSpi.getDecoder(cacheKey) instanceof Decoder.FloatDecoder) {
+			return ((Decoder.FloatDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeFloat(iter);
+		} else {
+			throw new IOException();
+		}
 	}
 
 	public static final double readDouble(String cacheKey, JsonIterator iter) throws IOException {
-		return ((Decoder.DoubleDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeDouble(iter);
+		if (JsoniterSpi.getDecoder(cacheKey) instanceof Decoder.DoubleDecoder) {
+			return ((Decoder.DoubleDecoder) JsoniterSpi.getDecoder(cacheKey)).decodeDouble(iter);
+		} else {
+			throw new IOException();
+		}
 	}
 
 	public static final <T> T read(String cacheKey, JsonIterator iter) throws IOException {
