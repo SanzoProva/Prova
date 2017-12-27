@@ -14,6 +14,9 @@ import java.util.Map;
 
 class CodegenImplNative {
 	final static Map<String, String> NATIVE_READS = new HashMap<String, String>() {
+	
+		private static final long serialVersionUID = 874458113069068781L;
+
 		{
 			put("float", "iter.readFloat()");
 			put("double", "iter.readDouble()");
@@ -40,6 +43,9 @@ class CodegenImplNative {
 		}
 	};
 	final static Map<Class, Decoder> NATIVE_DECODERS = new HashMap<Class, Decoder>() {
+	
+		private static final long serialVersionUID = -7523697381530370133L;
+
 		{
 			put(float.class, new Decoder() {
 				@Override
