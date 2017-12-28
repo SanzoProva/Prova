@@ -356,17 +356,19 @@ abstract class Base64 {
 		int sIx = start, eIx = end - 1; // Start and end index after trimming.
 
 		// Trim illegal chars from start
-		while (sIx < eIx && IA[Integer
+		int noMethodInWhile = IA[Integer
 				.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[sIx])).longValue(),
 						Long.getLong(Integer.toString(0xff)).longValue(), '&')))
-				.intValue()] < 0)
+				.intValue()];
+		while (sIx < eIx && noMethodInWhile < 0)
 			sIx++;
 
 		// Trim illegal chars from end
-		while (eIx > 0 && IA[Integer
+		noMethodInWhile = IA[Integer
 				.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[eIx])).longValue(),
 						Long.getLong(Integer.toString(0xff)).longValue(), '&')))
-				.intValue()] < 0)
+				.intValue()];
+		while (eIx > 0 && noMethodInWhile < 0)
 			eIx--;
 
 		// get the padding count (=) (0, 1 or 2)
