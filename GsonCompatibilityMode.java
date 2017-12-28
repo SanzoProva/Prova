@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.annotations.Since;
 import com.google.gson.annotations.Until;
 import com.jsoniter.JsonIterator;
+import com.jsoniter.SupportBitwise;
 import com.jsoniter.ValueType;
 import com.jsoniter.annotation.JsonIgnore;
 import com.jsoniter.annotation.JsonProperty;
@@ -100,10 +101,7 @@ public class GsonCompatibilityMode extends Config {
 			return this;
 		}
 
-		public Builder setDateFormat(int dateStyle) {
-			// no op, same as gson
-			return this;
-		}
+		
 
 		public Builder setDateFormat(final int dateStyle, final int timeStyle) {
 			dateFormat = new ThreadLocal<DateFormat>() {
@@ -115,17 +113,13 @@ public class GsonCompatibilityMode extends Config {
 			return this;
 		}
 
-		public Builder setDateFormat(final String pattern) {
+		public Builder setDateFormat() {
+			
 			class JdkDatetimeSupport {
-
-				
-				private String pattern = null;
 				// 2014-04-01 10:45
 				LocalDateTime dateTime = LocalDateTime.of(2014, Month.APRIL, 1, 10, 45);
 				// format as ISO week date (2014-W08-4)
 				String asIsoWeekDate = dateTime.format(DateTimeFormatter.ISO_WEEK_DATE);
-				// format ISO date time (2014-02-20T20:04:05.867)
-				String asIsoDateTime = dateTime.format(DateTimeFormatter.ISO_DATE_TIME);
 				// using a custom pattern (01/04/2014)
 				String asCustomPattern = dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 				// french date formatting (1. avril 2014)
@@ -138,8 +132,8 @@ public class GsonCompatibilityMode extends Config {
 				LocalDate fromIsoDate = LocalDate.parse("2014-01-20");
 				LocalDate fromIsoWeekDate = LocalDate.parse("2014-W14-2", DateTimeFormatter.ISO_WEEK_DATE);
 				LocalDate fromCustomPattern = LocalDate.parse("20.01.2014", DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-			    ;
-				}
+			    
+			}
 			
 			return this;
 		}
@@ -321,15 +315,15 @@ public class GsonCompatibilityMode extends Config {
 							stream.writeRaw("\\u2029");
 						} else {
 							if (c < 0x800) { // 2-byte
-								Integer n1 = Integer.valueOf((0xc0 | (c >> 6)));
-								Integer n2 = Integer.valueOf((0x80 | (c & 0x3f)));
+								Integer n1 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0xc0)), Long.getLong(Integer.toString(c>>6)), '|'))).intValue());
+								Integer n2 = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0x80)), Long.getLong(Integer.toString(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c)).longValue(), Long.getLong(Integer.toString(0x3f)).longValue(), '&'))).intValue())).longValue(), '|'))).intValue();
 								stream.write(n1.byteValue(), n2.byteValue());
 							} else { // 3 or 4 bytes
 								// Surrogates?
 								if (c < SURR1_FIRST || c > SURR2_LAST) {
-									Integer n1 = Integer.valueOf((0xe0 | (c >> 12)));
-									Integer n2 = Integer.valueOf((0x80 | ((c >> 6) & 0x3f)));
-									Integer n3 = Integer.valueOf((0x80 | (c & 0x3f)));
+									Integer n1 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0xe0)), Long.getLong(Integer.toString(c>>12)), '|'))).intValue());
+						Integer n2 = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0x80)), Long.getLong(Integer.toString(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c>>6)).longValue(), Long.getLong(Integer.toString(0x3f)).longValue(), '&'))).intValue())).longValue(), '|'))).intValue();
+						Integer n3 = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0x80)).longValue(), Long.getLong(Integer.toString(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c)).longValue(), Long.getLong(Integer.toString(0x3f)).longValue(), '&'))).intValue())).longValue(), '|'))).intValue();
 									stream.write(n1.byteValue(), n2.byteValue(), n3.byteValue());
 									continue;
 								}
@@ -360,11 +354,11 @@ public class GsonCompatibilityMode extends Config {
 									// as in XML
 									throw new JsonException("illegalSurrogate");
 								}
-
-								Integer n1 = Integer.valueOf((0xf0 | (c >> 18)));
-								Integer n2 = Integer.valueOf((0x80 | ((c >> 12) & 0x3f)));
-								Integer n3 = Integer.valueOf((0x80 | ((c >> 6) & 0x3f)));
-								Integer n4 = Integer.valueOf((0x80 | (c & 0x3f)));
+								
+								Integer n1 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0xf0)).longValue(), Long.getLong(Integer.toString(c>>18)).longValue(), '|'))).intValue());
+								Integer n2 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0x80)).longValue(), Long.getLong(Integer.toString(Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c>>12)).longValue(), Long.getLong(Integer.toString(0x3f)).longValue(), '&'))).intValue()))).longValue(), '|'))).intValue());
+								Integer n3 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0x80)).longValue(), Long.getLong(Integer.toString(Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c>>6)).longValue(), Long.getLong(Integer.toString(0x3f)).longValue(), '&'))).intValue()))), '|'))));
+								Integer n4 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(0x80)).longValue(), Long.getLong(Integer.toString(Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c)).longValue(), Long.getLong(Integer.toString(0x3f)).longValue(), '&'))).intValue()))), '|'))));
 								stream.write(n1.byteValue(), n2.byteValue(), n3.byteValue(), n4.byteValue());
 							}
 						}

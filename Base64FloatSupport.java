@@ -31,7 +31,9 @@ public class Base64FloatSupport {
 					.getInteger(Long
 							.toString(SupportBitwise.bitwise(Long.valueOf(Integer.toString(i)).longValue(), f, '&')))
 					.intValue()];
-			DIGITS[i] = Integer.getInteger(Long.toString(SupportBitwise.bitwise((long) first, (long) second, '|')))
+			DIGITS[i] = Integer
+					.getInteger(Long.toString(SupportBitwise.bitwise(Long.valueOf(Integer.toString(first)).longValue(),
+							Long.valueOf(Integer.toString(second)).longValue(), '|')))
 					.intValue();
 		}
 		DEC['0'] = 0;
@@ -185,8 +187,7 @@ public class Base64FloatSupport {
 		int tail = slice.tail();
 		for (int i = slice.head(); i < tail; i++) {
 			byte b = data[i];
-			int dec = DEC[b];
-			val = SupportBitwise.bitwise(val << 4, (long) dec, '|');
+			val = SupportBitwise.bitwise(val << 4, Long.valueOf(Integer.toString(DEC[b])).longValue(), '|');
 		}
 		return val;
 	}
