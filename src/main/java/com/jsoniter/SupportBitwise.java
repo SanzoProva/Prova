@@ -1,8 +1,17 @@
 package com.jsoniter;
 
 public class SupportBitwise {
-	// "Avoid using bitwise operators to make comparisons", this method fixes the
-	// problem.
+	private SupportBitwise() {
+
+	}
+
+	private final static char zero = '0';
+	private final static char uno = '1';
+
+	/*
+	 * "Avoid using bitwise operators to make comparisons", this method fixes the
+	 * boolean problem.
+	 */
 	public static boolean bitwise(String bin1, String bin2) {
 		boolean flag = false;
 		int l1 = bin1.length();
@@ -33,6 +42,10 @@ public class SupportBitwise {
 		return flag;
 	}
 
+	/*
+	 * "Avoid using bitwise operators to make comparisons", this method fixes the
+	 * long problem.
+	 */
 	public static long bitwise(Long long1, Long long2, char c) {
 		String newLong = "";
 		long l = 0;
@@ -47,22 +60,29 @@ public class SupportBitwise {
 					if ((Character.getNumericValue(bin1.charAt(i)) == 0
 							&& Character.getNumericValue(bin2.charAt(l2)) == 1)
 							|| (Character.getNumericValue(bin1.charAt(i)) == 1
-									&& Character.getNumericValue(bin2.charAt(l2)) == 0))
-						newLong = "0" + newLong;
+									&& Character.getNumericValue(bin2.charAt(l2)) == 0)) {
+						newLong = zero + newLong;
+					}
 				} else if (c == '|') {
 					if ((Character.getNumericValue(bin1.charAt(i)) == 0
 							&& Character.getNumericValue(bin2.charAt(l2)) == 1)
 							|| (Character.getNumericValue(bin1.charAt(i)) == 1
-									&& Character.getNumericValue(bin2.charAt(l2)) == 0))
-						newLong = "1" + newLong;
-				} else
+									&& Character.getNumericValue(bin2.charAt(l2)) == 0)) {
+						newLong = uno + newLong;
+					}
+				} else {
 					System.out.println(c + " operand not recognized");
+				}
 
-				if ((Character.getNumericValue(bin1.charAt(i)) == 0 && Character.getNumericValue(bin2.charAt(l2)) == 0))
-					newLong = "0" + newLong;
+				if ((Character.getNumericValue(bin1.charAt(i)) == 0
+						&& Character.getNumericValue(bin2.charAt(l2)) == 0)) {
+					newLong = zero + newLong;
+				}
 
-				if ((Character.getNumericValue(bin1.charAt(i)) == 1 && Character.getNumericValue(bin2.charAt(l2)) == 1))
-					newLong = "1" + newLong;
+				if ((Character.getNumericValue(bin1.charAt(i)) == 1
+						&& Character.getNumericValue(bin2.charAt(l2)) == 1)) {
+					newLong = uno + newLong;
+				}
 			}
 		} else {
 			for (int i = l2 - 1; i >= 0; i--) {
@@ -71,27 +91,34 @@ public class SupportBitwise {
 					if ((Character.getNumericValue(bin1.charAt(l1)) == 0
 							&& Character.getNumericValue(bin2.charAt(i)) == 1)
 							|| (Character.getNumericValue(bin1.charAt(l1)) == 1
-									&& Character.getNumericValue(bin2.charAt(i)) == 0))
-						newLong = "0" + newLong;
+									&& Character.getNumericValue(bin2.charAt(i)) == 0)) {
+						newLong = zero + newLong;
+					}
 				} else if (c == '|') {
 					if ((Character.getNumericValue(bin1.charAt(l1)) == 0
 							&& Character.getNumericValue(bin2.charAt(i)) == 1)
 							|| (Character.getNumericValue(bin1.charAt(l1)) == 1
-									&& Character.getNumericValue(bin2.charAt(i)) == 0))
-						newLong = "1" + newLong;
-				} else
+									&& Character.getNumericValue(bin2.charAt(i)) == 0)) {
+						newLong = uno + newLong;
+					}
+				} else {
 					System.out.println(c + " operand not recognized");
+				}
 
-				if ((Character.getNumericValue(bin1.charAt(l1)) == 0 && Character.getNumericValue(bin2.charAt(i)) == 0))
-					newLong = "0" + newLong;
+				if ((Character.getNumericValue(bin1.charAt(l1)) == 0
+						&& Character.getNumericValue(bin2.charAt(i)) == 0)) {
+					newLong = zero + newLong;
+				}
 
-				if ((Character.getNumericValue(bin1.charAt(l1)) == 1 && Character.getNumericValue(bin2.charAt(i)) == 1))
-					newLong = "1" + newLong;
+				if ((Character.getNumericValue(bin1.charAt(l1)) == 1
+						&& Character.getNumericValue(bin2.charAt(i)) == 1)) {
+					newLong = uno + newLong;
+				}
 			}
 		}
 		for (int i = newLong.length() - 1; i >= 0; i--) {
-			if (newLong.charAt(i) == '1') {
-				l += Math.pow(2, newLong.length() - 1 - i);
+			if (newLong.charAt(i) == uno) {
+				l = (long) (Math.pow(2, newLong.length() - 1 - i) + l);
 			}
 		}
 		return l;
