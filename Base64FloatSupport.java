@@ -27,8 +27,12 @@ public class Base64FloatSupport {
 		long f = 0xf;
 		for (int i = 0; i < 256; i++) {
 			int first = HEX[i >> 4] << 8;
-			int second =  HEX[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.valueOf(Integer.toString(i)).longValue(), f, '&'))).intValue()];
-			DIGITS[i] = (int) SupportBitwise.bitwise( (long) first, (long)second , '|');
+			int second = HEX[Integer
+					.getInteger(Long
+							.toString(SupportBitwise.bitwise(Long.valueOf(Integer.toString(i)).longValue(), f, '&')))
+					.intValue()];
+			DIGITS[i] = Integer.getInteger(Long.toString(SupportBitwise.bitwise((long) first, (long) second, '|')))
+					.intValue();
 		}
 		DEC['0'] = 0;
 		DEC['1'] = 1;
@@ -50,73 +54,74 @@ public class Base64FloatSupport {
 
 	private static boolean enabled = false;
 
-	public static  void enableEncodersAndDecoders() {
-		synchronized(Base64FloatSupport.class){
-		if (enabled) {
-			throw new JsonException("BinaryFloatSupport.enable can only be called once");
-		}
-		enabled = true;
-		enableDecoders();
-		JsoniterSpi.registerTypeEncoder(Double.class, new Encoder.ReflectionEncoder() {
-			@Override
-			public void encode(Object obj, JsonStream stream) throws IOException {
-				Double number = null;
-				if (obj instanceof Double) {
-					number = (Double) obj;
-				}
-				long bits = Double.doubleToRawLongBits(number.doubleValue());
-				Base64.encodeLongBits(bits, stream);
+	public static void enableEncodersAndDecoders() {
+		synchronized (Base64FloatSupport.class) {
+			if (enabled) {
+				throw new JsonException("BinaryFloatSupport.enable can only be called once");
 			}
-
-			@Override
-			public Any wrap(Object obj) {
-				Double number = null;
-				if (obj instanceof Double) {
-					number = (Double) obj;
-				}
-				return Any.wrap(number.doubleValue());
-			}
-		});
-		JsoniterSpi.registerTypeEncoder(double.class, new Encoder.DoubleEncoder() {
-			@Override
-			public void encodeDouble(double obj, JsonStream stream) throws IOException {
-				long bits = Double.doubleToRawLongBits(obj);
-				Base64.encodeLongBits(bits, stream);
-			}
-		});
-		JsoniterSpi.registerTypeEncoder(Float.class, new Encoder.ReflectionEncoder() {
-			@Override
-			public void encode(Object obj, JsonStream stream) throws IOException {
-				Float number = null;
-				if (obj instanceof Float) {
-					number = (Float) obj;
-				}
-				long bits = Double.doubleToRawLongBits(number.doubleValue());
-				Base64.encodeLongBits(bits, stream);
-			}
-
-			@Override
-			public Any wrap(Object obj) {
-				try {
-					if (obj instanceof Float) {
-						return Any.wrap(((Float) obj).floatValue());
+			enabled = true;
+			enableDecoders();
+			JsoniterSpi.registerTypeEncoder(Double.class, new Encoder.ReflectionEncoder() {
+				@Override
+				public void encode(Object obj, JsonStream stream) throws IOException {
+					Double number = null;
+					if (obj instanceof Double) {
+						number = (Double) obj;
 					}
-				} catch (Exception e) {
-					System.out.print(e.getMessage());
-				} finally {
-					System.out.print("");
+					long bits = Double.doubleToRawLongBits(number.doubleValue());
+					Base64.encodeLongBits(bits, stream);
 				}
-				return null;
-			}
-		});
-		JsoniterSpi.registerTypeEncoder(float.class, new Encoder.FloatEncoder() {
-			@Override
-			public void encodeFloat(float obj, JsonStream stream) throws IOException {
-				long bits = Double.doubleToRawLongBits(obj);
-				Base64.encodeLongBits(bits, stream);
-			}
-		});
-	}}
+
+				@Override
+				public Any wrap(Object obj) {
+					Double number = null;
+					if (obj instanceof Double) {
+						number = (Double) obj;
+					}
+					return Any.wrap(number.doubleValue());
+				}
+			});
+			JsoniterSpi.registerTypeEncoder(double.class, new Encoder.DoubleEncoder() {
+				@Override
+				public void encodeDouble(double obj, JsonStream stream) throws IOException {
+					long bits = Double.doubleToRawLongBits(obj);
+					Base64.encodeLongBits(bits, stream);
+				}
+			});
+			JsoniterSpi.registerTypeEncoder(Float.class, new Encoder.ReflectionEncoder() {
+				@Override
+				public void encode(Object obj, JsonStream stream) throws IOException {
+					Float number = null;
+					if (obj instanceof Float) {
+						number = (Float) obj;
+					}
+					long bits = Double.doubleToRawLongBits(number.doubleValue());
+					Base64.encodeLongBits(bits, stream);
+				}
+
+				@Override
+				public Any wrap(Object obj) {
+					try {
+						if (obj instanceof Float) {
+							return Any.wrap(((Float) obj).floatValue());
+						}
+					} catch (Exception e) {
+						System.out.print(e.getMessage());
+					} finally {
+						System.out.print("");
+					}
+					return null;
+				}
+			});
+			JsoniterSpi.registerTypeEncoder(float.class, new Encoder.FloatEncoder() {
+				@Override
+				public void encodeFloat(float obj, JsonStream stream) throws IOException {
+					long bits = Double.doubleToRawLongBits(obj);
+					Base64.encodeLongBits(bits, stream);
+				}
+			});
+		}
+	}
 
 	public static void enableDecoders() {
 		JsoniterSpi.registerTypeDecoder(Double.class, new Decoder() {
@@ -180,7 +185,8 @@ public class Base64FloatSupport {
 		int tail = slice.tail();
 		for (int i = slice.head(); i < tail; i++) {
 			byte b = data[i];
-			val = val << 4 | DEC[b];
+			int dec = DEC[b];
+			val = SupportBitwise.bitwise(val << 4, (long) dec, '|');
 		}
 		return val;
 	}
@@ -189,7 +195,7 @@ public class Base64FloatSupport {
 		Character c = '"';
 		byte ch = c.toString().getBytes()[0];
 		Integer intero = null;
-		long ff= 0xff;
+		long ff = 0xff;
 		Long longdigit = SupportBitwise.bitwise(bits, ff, '&');
 		int digit = DIGITS[longdigit.intValue()];
 		intero = digit >> 8;
