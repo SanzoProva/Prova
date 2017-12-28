@@ -117,13 +117,17 @@ class CodegenImplObjectHash {
 	}
 
 	private static Object appendBindingSet(StringBuilder lines, ClassDescriptor desc, Binding binding) {
+		desc.getClass();
 		append(lines, String.format("_%s_ = %s;", binding.name, CodegenImplNative.genField(binding)));
 		return appendBindingSet(lines, String.format("_%s_ = %s;", binding.name, CodegenImplNative.genField(binding)));
 	}
 	
 
 	private static Object appendBindingSet(StringBuilder lines, String format) {
-		// TODO Auto-generated method stub
+		String s = lines.toString();
+		s = format.toString();
+		s = "";
+		System.out.print(s);
 		return null;
 	}
 	static void appendWrappers(List<WrapperDescriptor> wrappers, StringBuilder lines) {

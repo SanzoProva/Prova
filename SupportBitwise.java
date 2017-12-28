@@ -34,7 +34,7 @@ public class SupportBitwise {
 	}
 
 	public static long bitwise(Long long1, Long long2, char c) {
-		String newLong = new String("");
+		String newLong = "";
 		long l = 0;
 		String bin1 = Long.toBinaryString(long1);
 		String bin2 = Long.toBinaryString(long2);

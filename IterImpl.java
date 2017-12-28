@@ -214,6 +214,7 @@ class IterImpl {
 	}
 
 	public final static boolean loadMore(JsonIterator iter) throws IOException {
+		iter.toString();
 		return false;
 	}
 
@@ -274,18 +275,75 @@ class IterImpl {
 					default:
 						throw iter.reportError("readStringSlowPath", "invalid escape character: " + bc);
 					}
-				} else if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(), Long.getLong(Integer.toString(0x80)).longValue(), '&'))).intValue()) != 0) {
+				} else if ((Integer
+						.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
+								Long.getLong(Integer.toString(0x80)).longValue(), '&')))
+						.intValue()) != 0) {
 					final int u2 = iter.buf[i++];
-					if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(), Long.getLong(Integer.toString(0xE0)).longValue(), '&'))).intValue()) == 0xC0) {
-						bc = ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(), Long.getLong(Integer.toString(0x1F)).longValue(), '&'))).intValue()) << 6) + (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(), Long.getLong(Integer.toString(0x3F)).longValue(), '&'))).intValue());
+					if ((Integer
+							.getInteger(
+									Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
+											Long.getLong(Integer.toString(0xE0)).longValue(), '&')))
+							.intValue()) == 0xC0) {
+						bc = ((Integer
+								.getInteger(Long
+										.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
+												Long.getLong(Integer.toString(0x1F)).longValue(), '&')))
+								.intValue()) << 6)
+								+ (Integer
+										.getInteger(Long.toString(
+												SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(),
+														Long.getLong(Integer.toString(0x3F)).longValue(), '&')))
+										.intValue());
 					} else {
 						final int u3 = iter.buf[i++];
-						if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(), Long.getLong(Integer.toString(0xF0)).longValue(), '&'))).intValue()) == 0xE0) {
-							bc = ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(), Long.getLong(Integer.toString(0x0F)).longValue(), '&'))).intValue()) << 12) + ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(), Long.getLong(Integer.toString(0x3F)).longValue(), '&'))).intValue()) << 6) + (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u3)).longValue(), Long.getLong(Integer.toString(0x3F)).longValue(), '&'))).intValue());
+						if ((Integer
+								.getInteger(Long
+										.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
+												Long.getLong(Integer.toString(0xF0)).longValue(), '&')))
+								.intValue()) == 0xE0) {
+							bc = ((Integer
+									.getInteger(Long.toString(
+											SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
+													Long.getLong(Integer.toString(0x0F)).longValue(), '&')))
+									.intValue()) << 12)
+									+ ((Integer
+											.getInteger(Long.toString(SupportBitwise.bitwise(
+													Long.getLong(Integer.toString(u2)).longValue(),
+													Long.getLong(Integer.toString(0x3F)).longValue(), '&')))
+											.intValue()) << 6)
+									+ (Integer
+											.getInteger(Long.toString(SupportBitwise.bitwise(
+													Long.getLong(Integer.toString(u3)).longValue(),
+													Long.getLong(Integer.toString(0x3F)).longValue(), '&')))
+											.intValue());
 						} else {
 							final int u4 = iter.buf[i++];
-							if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(), Long.getLong(Integer.toString(0xF8)).longValue(), '&'))).intValue()) == 0xF0) {
-								bc = ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(), Long.getLong(Integer.toString(0x07)).longValue(), '&'))).intValue()) << 18) + ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(), Long.getLong(Integer.toString(0x3F)).longValue(), '&'))).intValue()) << 12) + ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u3)).longValue(), Long.getLong(Integer.toString(0x3F)).longValue(), '&'))).intValue())<< 6) + (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u4)).longValue(), Long.getLong(Integer.toString(0x3F)).longValue(), '&'))).intValue());
+							if ((Integer
+									.getInteger(Long.toString(
+											SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
+													Long.getLong(Integer.toString(0xF8)).longValue(), '&')))
+									.intValue()) == 0xF0) {
+								bc = ((Integer
+										.getInteger(Long.toString(
+												SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
+														Long.getLong(Integer.toString(0x07)).longValue(), '&')))
+										.intValue()) << 18)
+										+ ((Integer
+												.getInteger(Long.toString(SupportBitwise.bitwise(
+														Long.getLong(Integer.toString(u2)).longValue(),
+														Long.getLong(Integer.toString(0x3F)).longValue(), '&')))
+												.intValue()) << 12)
+										+ ((Integer
+												.getInteger(Long.toString(SupportBitwise.bitwise(
+														Long.getLong(Integer.toString(u3)).longValue(),
+														Long.getLong(Integer.toString(0x3F)).longValue(), '&')))
+												.intValue()) << 6)
+										+ (Integer
+												.getInteger(Long.toString(SupportBitwise.bitwise(
+														Long.getLong(Integer.toString(u4)).longValue(),
+														Long.getLong(Integer.toString(0x3F)).longValue(), '&')))
+												.intValue());
 							} else {
 								throw iter.reportError("readStringSlowPath", "invalid unicode character");
 							}
@@ -301,15 +359,23 @@ class IterImpl {
 									System.arraycopy(iter.reusableChars, 0, newBuf, 0, iter.reusableChars.length);
 									iter.reusableChars = newBuf;
 								}
-								Integer a = (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(), Long.getLong(Integer.toString(0x3ff)).longValue(), '&'))).intValue() + + 0xdc00);
-                                iter.reusableChars[j++] = a.toString().toCharArray()[0];
+								Integer a = (Integer
+										.getInteger(Long.toString(
+												SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(),
+														Long.getLong(Integer.toString(0x3ff)).longValue(), '&')))
+										.intValue() + +0xdc00);
+								iter.reusableChars[j++] = a.toString().toCharArray()[0];
 								if (iter.reusableChars.length == j) {
 									char[] newBuf = new char[iter.reusableChars.length * 2];
 									System.arraycopy(iter.reusableChars, 0, newBuf, 0, iter.reusableChars.length);
 									iter.reusableChars = newBuf;
 								}
-								Integer b = (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(), Long.getLong(Integer.toString(0x3ff)).longValue(), '&'))).intValue() + 0xdc00);
-                                iter.reusableChars[j++] = b.toString().toCharArray()[0];
+								Integer b = (Integer
+										.getInteger(Long.toString(
+												SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(),
+														Long.getLong(Integer.toString(0x3ff)).longValue(), '&')))
+										.intValue() + 0xdc00);
+								iter.reusableChars[j++] = b.toString().toCharArray()[0];
 								continue;
 							}
 						}
