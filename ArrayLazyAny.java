@@ -39,7 +39,8 @@ class ArrayLazyAny extends LazyAny {
 		try {
 			return CodegenAccess.readArrayStart(iter);
 		} catch (IOException e) {
-			throw new JsonException(e.getMessage() + "");
+			String s = e.getMessage();
+			throw new JsonException(s);
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}
@@ -145,7 +146,8 @@ class ArrayLazyAny extends LazyAny {
 			}
 			lastParsedPos = tail;
 		} catch (IOException e) {
-			throw new JsonException(e.getMessage() + "");
+			String s = e.getMessage();
+			throw new JsonException(s);
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}
@@ -192,7 +194,8 @@ class ArrayLazyAny extends LazyAny {
 			}
 			lastParsedPos = tail;
 		} catch (IOException e) {
-			throw new JsonException(e.getMessage() + "");
+			String s = e.getMessage();
+			throw new JsonException(s);
 		} finally {
 			JsonIteratorPool.returnJsonIterator(iter);
 		}
