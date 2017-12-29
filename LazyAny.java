@@ -28,7 +28,7 @@ abstract class LazyAny extends Any {
         try {
             return iter.read(obj);
         } catch (IOException e) {
-            throw new JsonException(e);
+            throw new JsonException(e.getMessage());
         } finally {
             JsonIteratorPool.returnJsonIterator(iter);
         }
@@ -39,7 +39,7 @@ abstract class LazyAny extends Any {
         try {
             return iter.read(typeLiteral, obj);
         } catch (IOException e) {
-            throw new JsonException(e);
+            throw new JsonException(e.getMessage());
         } finally {
             JsonIteratorPool.returnJsonIterator(iter);
         }
@@ -50,7 +50,7 @@ abstract class LazyAny extends Any {
         try {
             return iter.read(clazz);
         } catch (IOException e) {
-            throw new JsonException(e);
+            throw new JsonException(e.getMessage());
         } finally {
             JsonIteratorPool.returnJsonIterator(iter);
         }
@@ -61,7 +61,7 @@ abstract class LazyAny extends Any {
         try {
             return iter.read(typeLiteral);
         } catch (IOException e) {
-            throw new JsonException(e);
+            throw new JsonException(e.getMessage());
         } finally {
             JsonIteratorPool.returnJsonIterator(iter);
         }
