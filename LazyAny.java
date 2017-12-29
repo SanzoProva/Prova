@@ -28,7 +28,7 @@ abstract class LazyAny extends Any {
         try {
             return iter.read(obj);
         } catch (IOException e) {
-        	String s = e.getMessage().substring(0, e.getMessage().length());
+        	String s = "Error" + e.getMessage().substring(0, e.getMessage().length()) + "";
 			throw new JsonException(s);
         } finally {
             JsonIteratorPool.returnJsonIterator(iter);
