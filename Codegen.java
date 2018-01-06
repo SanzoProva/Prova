@@ -184,7 +184,8 @@ class Codegen {
 					throw new JsonException("dynamic code can not serialize private class: " + type);
 				}
 			}
-			encoder = quinto(JsoniterSpi.getCurrentConfig().encodingMode(), new ClassInfo(chooseAccessibleSuper(type)), encoder, cacheKey);
+			encoder = quinto(JsoniterSpi.getCurrentConfig().encodingMode(), new ClassInfo(chooseAccessibleSuper(type)),
+					encoder, cacheKey);
 			JsoniterSpi.addNewEncoder(cacheKey, encoder);
 			return encoder;
 		}
@@ -223,13 +224,8 @@ class Codegen {
 		Type[] typeArgs = new Type[0];
 		Class clazz = null;
 		if (type instanceof ParameterizedType) {
-			ParameterizedType pType = null;
-			if (type instanceof ParameterizedType) {
-				pType = (ParameterizedType) type;
-			}
-			if (pType.getRawType() instanceof Class) {
-				clazz = (Class) pType.getRawType();
-			}
+			ParameterizedType pType = (ParameterizedType) type;
+			clazz = (Class) pType.getRawType();
 			typeArgs = pType.getActualTypeArguments();
 		} else {
 			if (type instanceof Class) {
