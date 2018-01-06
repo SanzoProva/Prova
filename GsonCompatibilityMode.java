@@ -41,8 +41,6 @@ public class GsonCompatibilityMode extends Config {
 	private final static int SURR2_LAST = 0xDFFF;
 	private static final String[] REPLACEMENT_CHARS;
 	private static final String[] HTML_SAFE_REPLACEMENT_CHARS;
-	private final String[] newSA0 = newStringArray(0);	
-	private final String[] newSA1 = newStringArray(1);
 
 	static {
 		REPLACEMENT_CHARS = new String[128];
@@ -611,7 +609,8 @@ public class GsonCompatibilityMode extends Config {
 						return iter.readFloat();
 					case NULL:
 						iter.skip();
-						return  0.0f;
+						final float n = 0.0f;
+						return  n;
 					default:
 						throw new JsonException("expect float, but found " + valueType);
 					}
@@ -627,7 +626,8 @@ public class GsonCompatibilityMode extends Config {
 						return iter.readDouble();
 					case NULL:
 						iter.skip();
-						return  0.0d;
+						final double n = 0.0d;
+						return  n;
 					default:
 						throw new JsonException("expect float, but found " + valueType);
 					}
@@ -638,6 +638,7 @@ public class GsonCompatibilityMode extends Config {
 	}
 
 	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding, String translated) {
+		final String[] newSA1 = newStringArray(1);
 		com.jsoniter.spi.Binding bin = binding;
 		bin.toNames = newSA1;
 		bin.toNames[0] = translated;
@@ -648,6 +649,7 @@ public class GsonCompatibilityMode extends Config {
 
 	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding,
 			FieldNamingStrategy fieldNamingStrategy) {
+		final String[] newSA0 = newStringArray(0);	
 		FieldNamingStrategy f = fieldNamingStrategy;
 		com.jsoniter.spi.Binding bin = binding;
 		if (bin.method != null) {
