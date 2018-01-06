@@ -239,14 +239,32 @@ public class GsonCompatibilityMode extends Config {
 			return new GsonCompatibilityMode(configName, this);
 		}
 
-		public boolean equalSupp(Builder bull, boolean flag) {
+		/**
+		 * 
+		 * @param b1
+		 * @param b2
+		 * @param b3
+		 * @param flag
+		 * @return
+		 */
+		private boolean equalSupp2(boolean b1, boolean b2, boolean b3, boolean flag) {
+			return b1 ? false : b2 ? false : b3 ? false : flag;
+		}
+
+		/**
+		 * 
+		 * @param bull
+		 * @param flag
+		 * @return
+		 */
+		private boolean equalSupp(Builder bull, boolean flag) {
 			Builder builder = bull;
 			boolean b1 = (excludeFieldsWithoutExposeAnnotation != builder.excludeFieldsWithoutExposeAnnotation);
 			boolean b2 = (disableHtmlEscaping != builder.disableHtmlEscaping);
 			boolean b3 = (!dateFormat.get().equals(builder.dateFormat.get()));
-			
-			boolean flag2 = b1 ? false : b2 ? false : b3 ? false : flag;
-			
+
+			boolean flag2 = equalSupp2(b1, b2, b3, flag);
+
 			if (fieldNamingStrategy != null ? !fieldNamingStrategy.equals(builder.fieldNamingStrategy)
 					: builder.fieldNamingStrategy != null) {
 				flag2 = false;
@@ -638,23 +656,21 @@ public class GsonCompatibilityMode extends Config {
 	}
 
 	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding, String translated) {
-		final String[] newSA1 = newStringArray(1);
 		com.jsoniter.spi.Binding bin = binding;
-		bin.toNames = newSA1;
+		bin.toNames = newStringArray(1);
 		bin.toNames[0] = translated;
-		bin.fromNames = newSA1;
+		bin.fromNames = newStringArray(1);
 		bin.fromNames[0] = translated;
 		return bin;
 	}
 
 	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding,
 			FieldNamingStrategy fieldNamingStrategy) {
-		final String[] newSA0 = newStringArray(0);	
 		FieldNamingStrategy f = fieldNamingStrategy;
 		com.jsoniter.spi.Binding bin = binding;
 		if (bin.method != null) {
-			bin.toNames = newSA0;
-			bin.fromNames = newSA0;
+			bin.toNames = newStringArray(0);
+			bin.fromNames = newStringArray(0);
 		}
 		if (f != null && bin.field != null) {
 			String translated = f.translateName(bin.field);
@@ -664,13 +680,14 @@ public class GsonCompatibilityMode extends Config {
 		if (builder().version != null) {
 			Since since = bin.getAnnotation(Since.class);
 			if (since != null && builder().version < since.value()) {
-				bin.toNames = newSA0;
-				bin.fromNames = newSA0;
+				bin.toNames = newStringArray(0);
+				bin.fromNames = newStringArray(0);
 			}
 			Until until = bin.getAnnotation(Until.class);
-			if (until != null && builder().version >= until.value()) {
-				bin.toNames = newSA0;
-				bin.fromNames = newSA0;
+			boolean ciclomatic = until != null && builder().version >= until.value();
+			if (ciclomatic) {
+				bin.toNames = newStringArray(0);
+				bin.fromNames = newStringArray(0);
 			}
 		}
 		return bin;
