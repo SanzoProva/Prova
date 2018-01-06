@@ -247,7 +247,7 @@ public class GsonCompatibilityMode extends Config {
 		 * @param flag
 		 * @return
 		 */
-		private boolean equalSupp2(boolean b1, boolean b2, boolean b3, boolean flag) {
+		protected boolean equalSupp2(boolean b1, boolean b2, boolean b3, boolean flag) {
 			return b1 ? false : b2 ? false : b3 ? false : flag;
 		}
 
@@ -655,7 +655,7 @@ public class GsonCompatibilityMode extends Config {
 		return super.createDecoder(cacheKey, type);
 	}
 
-	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding, String translated) {
+	public com.jsoniter.spi.Binding updateClassDescriptorSupp3(com.jsoniter.spi.Binding binding, String translated) {
 		com.jsoniter.spi.Binding bin = binding;
 		bin.toNames = newStringArray(1);
 		bin.toNames[0] = translated;
@@ -663,18 +663,22 @@ public class GsonCompatibilityMode extends Config {
 		bin.fromNames[0] = translated;
 		return bin;
 	}
+	
+	private boolean ciclomatic(boolean b1, boolean b2){
+		return b1 && b2;
+	}
 
-	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding,
-			FieldNamingStrategy fieldNamingStrategy) {
-		FieldNamingStrategy f = fieldNamingStrategy;
-		com.jsoniter.spi.Binding bin = binding;
+	public com.jsoniter.spi.Binding updateClassDescriptorSupp2(com.jsoniter.spi.Binding b, FieldNamingStrategy fNS) {
+		FieldNamingStrategy f = fNS;
+		com.jsoniter.spi.Binding bin = b;
 		if (bin.method != null) {
 			bin.toNames = newStringArray(0);
 			bin.fromNames = newStringArray(0);
 		}
-		if (f != null && bin.field != null) {
+		boolean ciclomatic = ciclomatic(f != null,bin.field != null);
+		if (ciclomatic) {
 			String translated = f.translateName(bin.field);
-			com.jsoniter.spi.Binding bind = updateClassDescriptorSupp(bin, translated);
+			com.jsoniter.spi.Binding bind = updateClassDescriptorSupp3(bin, translated);
 			bin = bind;
 		}
 		if (builder().version != null) {
@@ -684,8 +688,7 @@ public class GsonCompatibilityMode extends Config {
 				bin.fromNames = newStringArray(0);
 			}
 			Until until = bin.getAnnotation(Until.class);
-			boolean ciclomatic = until != null && builder().version >= until.value();
-			if (ciclomatic) {
+			if (until != null && builder().version >= until.value()) {
 				bin.toNames = newStringArray(0);
 				bin.fromNames = newStringArray(0);
 			}
@@ -693,7 +696,7 @@ public class GsonCompatibilityMode extends Config {
 		return bin;
 	}
 
-	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding) {
+	public com.jsoniter.spi.Binding updateClassDescriptorSupp1(com.jsoniter.spi.Binding binding) {
 		com.jsoniter.spi.Binding bin = binding;
 		for (ExclusionStrategy strategy : builder().deserializationExclusionStrategies) {
 			if (strategy.shouldSkipClass(bin.clazz)) {
@@ -711,7 +714,7 @@ public class GsonCompatibilityMode extends Config {
 	public void updateClassDescriptor(com.jsoniter.spi.ClassDescriptor desc) {
 		FieldNamingStrategy fieldNamingStrategy = builder().fieldNamingStrategy;
 		for (com.jsoniter.spi.Binding binding : desc.allBindings()) {
-			com.jsoniter.spi.Binding bin = updateClassDescriptorSupp(binding, fieldNamingStrategy);
+			com.jsoniter.spi.Binding bin = updateClassDescriptorSupp2(binding, fieldNamingStrategy);
 			binding = bin;
 			for (ExclusionStrategy strategy : builder().serializationExclusionStrategies) {
 				if (strategy.shouldSkipClass(binding.clazz)) {
@@ -722,7 +725,7 @@ public class GsonCompatibilityMode extends Config {
 					binding.toNames = new String[0];
 				}
 			}
-			com.jsoniter.spi.Binding bin1 = updateClassDescriptorSupp(binding);
+			com.jsoniter.spi.Binding bin1 = updateClassDescriptorSupp1(binding);
 			binding = bin1;
 		}
 		super.updateClassDescriptor(desc);
