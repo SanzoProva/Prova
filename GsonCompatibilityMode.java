@@ -349,154 +349,16 @@ public class GsonCompatibilityMode extends Config {
 				}
 			};
 		} else if (String.class == type) {
-			final String[] replacements;
-			if (builder().disableHtmlEscaping) {
-				replacements = REPLACEMENT_CHARS;
-			} else {
-				replacements = HTML_SAFE_REPLACEMENT_CHARS;
-			}
+			final String[] replacements = encodeSupp6();
 			return new com.jsoniter.spi.Encoder() {
 				@Override
 				public void encode(Object obj, JsonStream stream) throws IOException {
-					String value = null;
-					if (obj instanceof String) {
-						value = (String) obj;
-					}
+					String value = encodeSupp7(obj);
 					stream.write('"');
-					int _surrogate = 0;
-					int i = 0;
 					int n = value.length();
-					while (i < n) {
+					for (int i = 0; i < n;) {
 						int c = value.charAt(i);
-						String replacement = null;
-
-						switch (c) {
-						case 128:
-							replacement = replacements[c];
-							if (replacement == null) {
-								stream.write(c);
-							} else {
-								stream.writeRaw(replacement);
-							}
-							break;
-						case '\u2028':
-							stream.writeRaw("\\u2028");
-							break;
-						case '\u2029':
-							stream.writeRaw("\\u2029");
-							break;
-						default:
-							if (c < 0x800) { // 2-byte
-								Integer n1 = Integer
-										.valueOf(Integer
-												.getInteger(Long.toString(
-														SupportBitwise.bitwise(Long.getLong(Integer.toString(v[0])),
-																Long.getLong(Integer.toString(c >> v[1])), '|')))
-												.intValue());
-								Integer n2 = Integer
-										.getInteger(Long
-												.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])),
-														Long.getLong(Integer.toString(Integer
-																.getInteger(
-																		Long.toString(SupportBitwise.bitwise(
-																				Long.getLong(Integer.toString(c))
-																						.longValue(),
-																				Long.getLong(Integer.toString(v[3]))
-																						.longValue(),
-																				'&')))
-																.intValue())).longValue(),
-														'|')))
-										.intValue();
-								stream.write(n1.byteValue(), n2.byteValue());
-							} else { // 3 or 4 bytes
-								// Surrogates?
-								c = gsonSupport(stream, c, v);
-								// Yup, a surrogate:
-								if (c > SURR1_LAST) { // must be from first
-									// range
-									throw new JsonException("illegalSurrogate");
-								}
-								_surrogate = c;
-								// and if so, followed by another from next
-								// range
-								if (i >= value.length()) { // unless we hit the
-									// end?
-									break;
-								}
-								i++;
-								c = value.charAt(i);
-								int firstPart = _surrogate;
-								_surrogate = 0;
-								// Ok, then, is the second part valid?
-								if (c < SURR2_FIRST || c > SURR2_LAST) {
-									throw new JsonException(
-											"Broken surrogate pair: first char 0x" + Integer.toHexString(firstPart)
-													+ ", second 0x" + Integer.toHexString(c) + "; illegal combination");
-								}
-								c = 0x10000 + ((firstPart - SURR1_FIRST) << 10) + (c - SURR2_FIRST);
-								if (c > 0x10FFFF) { // illegal in JSON as well
-									// as in XML
-									throw new JsonException("illegalSurrogate");
-								}
-
-								Integer n1 = Integer.valueOf(Integer
-										.getInteger(Long.toString(
-												SupportBitwise.bitwise(Long.getLong(Integer.toString(v[6])).longValue(),
-														Long.getLong(Integer.toString(c >> v[7])).longValue(), '|')))
-										.intValue());
-								Integer n2 = Integer
-										.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(
-												Long.getLong(Integer.toString(v[2]))
-														.longValue(),
-												Long.getLong(
-														Integer.toString(
-																Integer.valueOf(Integer
-																		.getInteger(
-																				Long.toString(SupportBitwise.bitwise(
-																						Long.getLong(Integer
-																								.toString(c >> v[5]))
-																								.longValue(),
-																						Long.getLong(
-																								Integer.toString(v[3]))
-																								.longValue(),
-																						'&')))
-																		.intValue())))
-														.longValue(),
-												'|'))).intValue());
-								Integer n3 = Integer
-										.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(
-												Long.getLong(Integer.toString(v[2]))
-														.longValue(),
-												Long.getLong(
-														Integer.toString(
-																Integer.valueOf(Integer
-																		.getInteger(
-																				Long.toString(SupportBitwise.bitwise(
-																						Long.getLong(Integer
-																								.toString(c >> v[1]))
-																								.longValue(),
-																						Long.getLong(
-																								Integer.toString(v[3]))
-																								.longValue(),
-																						'&')))
-																		.intValue()))),
-												'|'))));
-								Integer n4 = Integer.valueOf(Integer.getInteger(Long.toString(
-										SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])).longValue(),
-												Long.getLong(
-														Integer.toString(Integer.valueOf(Integer
-																.getInteger(Long.toString(SupportBitwise
-																		.bitwise(
-																				Long.getLong(Integer.toString(c))
-																						.longValue(),
-																				Long.getLong(Integer.toString(v[3]))
-																						.longValue(),
-																				'&')))
-																.intValue()))),
-												'|'))));
-								stream.write(n1.byteValue(), n2.byteValue(), n3.byteValue(), n4.byteValue());
-							}
-						}
+						c = encodeSupp5(c, stream, replacements, i, value, v);
 						i++;
 					}
 					stream.write('"');
@@ -505,53 +367,145 @@ public class GsonCompatibilityMode extends Config {
 		}
 		return super.createEncoder(cacheKey, type);
 	}
+	
+	/**
+	 * 
+	 * @param c
+	 * @param firstPart
+	 * @param stream
+	 * @param v
+	 * @return
+	 * @throws IOException
+	 */
+	private int encodeSupp(int c, int firstPart, JsonStream stream, int[] v) throws IOException {
+		int ret = c;
+		if (ret < SURR2_FIRST || ret > SURR2_LAST) {
+			throw new JsonException(
+					"Broken surrogate pair: first char 0x" + Integer.toHexString(firstPart) + ", second 0x" + Integer.toHexString(c) + "; illegal combination");
+		}
+		ret = 0x10000 + ((firstPart - SURR1_FIRST) << 10) + (c - SURR2_FIRST);
+		if (ret > 0x10FFFF) { 
+			throw new JsonException("illegalSurrogate");
+		}
+		Integer n1 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[6])).longValue(),Long.getLong(Integer.toString(c >> v[7])).longValue(), '|'))).intValue());
+		Integer n2 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])).longValue(),Long.getLong(Integer.toString(Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c >> v[5])).longValue(),Long.getLong(Integer.toString(v[3])).longValue(),'&'))).intValue()))).longValue(),'|'))).intValue());
+		Integer n3 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])).longValue(),Long.getLong(Integer.toString(Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c >> v[1])).longValue(),Long.getLong(Integer.toString(v[3])).longValue(),'&'))).intValue()))),'|'))));
+		Integer n4 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])).longValue(),Long.getLong(Integer.toString(Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c)).longValue(),Long.getLong(Integer.toString(v[3])).longValue(),'&'))).intValue()))),'|'))));
+		stream.write(n1.byteValue(), n2.byteValue(), n3.byteValue(), n4.byteValue());
+		return ret;
+	}
+	
+	/**
+	 * 
+	 * @param stream
+	 * @param c
+	 * @param v
+	 * @throws IOException
+	 */
+	private void encodeSupp2(JsonStream stream, int c, int[] v) throws IOException {
+		Integer n1 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[0])),Long.getLong(Integer.toString(c >> v[1])), '|'))).intValue());
+		Integer n2 = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])),Long.getLong(Integer.toString(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c)).longValue(),Long.getLong(Integer.toString(v[3])).longValue(),'&'))).intValue())).longValue(),'|'))).intValue();
+		stream.write(n1.byteValue(), n2.byteValue());
+	}
+
+	/**
+	 * 
+	 * @param c
+	 * @param stream 
+	 * @param v 
+	 * @return 
+	 * @throws IOException 
+	 */
+	private int encodeSupp3(int c, JsonStream stream, int[] v) throws IOException {
+		int ret = c;
+		ret = gsonSupport(stream, ret, v);
+		if (c > SURR1_LAST) {
+			throw new JsonException("illegalSurrogate");
+		}
+		return ret;
+	}
+	
+	/**
+	 * 
+	 * @param stream
+	 * @param c
+	 * @param replacements
+	 * @throws IOException
+	 */
+	private void encodeSupp4(JsonStream stream, int c, String[] replacements) throws IOException {
+		String ret = replacements[c];
+		if (ret == null) {
+			stream.write(c);
+		} else {
+			stream.writeRaw(ret);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param c
+	 * @param stream
+	 * @param replacements
+	 * @param i
+	 * @param value
+	 * @param v
+	 * @return
+	 * @throws IOException
+	 */
+	private int encodeSupp5(int c, JsonStream stream, String[] replacements, int i, String value, int[] v) throws IOException {
+		int ret = c;
+		int index = i;
+		switch (ret) {
+		case 128:
+			encodeSupp4(stream, ret, replacements);
+			break;
+		case '\u2028':
+			stream.writeRaw("\\u2028");
+			break;
+		case '\u2029':
+			stream.writeRaw("\\u2029");
+			break;
+		default:
+			if (ret < 0x800) {
+				encodeSupp2(stream, ret, v);
+			} else {
+				ret = encodeSupp3(ret, stream, v);
+				if (index >= value.length()) {
+					break;
+				}
+				index++;
+				ret = encodeSupp(value.charAt(index), ret, stream, v);
+			}
+		}
+		return ret;
+	}
+	/**
+	 * 
+	 * @return
+	 */
+	private String[] encodeSupp6() {
+		final String[] ret;
+		if (builder().disableHtmlEscaping) {
+			ret = REPLACEMENT_CHARS;
+		} else {
+			ret = HTML_SAFE_REPLACEMENT_CHARS;
+		}
+		return ret;
+	}
+	
+	private String encodeSupp7(Object obj) {
+		String value = null;
+		if (obj instanceof String) {
+			value = (String) obj;
+		}
+		return value;
+	}
 
 	public int gsonSupport(JsonStream stream, int c, final int[] v) throws IOException {
 		if (c < SURR1_FIRST || c > SURR2_LAST) {
-			Integer n1 = Integer.valueOf(
-					Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[4])),
-							Long.getLong(Integer.toString(c >> v[5])), '|'))).intValue());
-			Integer n2 = Integer
-					.getInteger(
-							Long.toString(
-									SupportBitwise.bitwise(
-											Long.getLong(Integer.toString(v[2])), Long
-													.getLong(Integer
-															.toString(Integer
-																	.getInteger(Long.toString(SupportBitwise.bitwise(
-																			Long.getLong(Integer.toString(c >> v[1]))
-																					.longValue(),
-																			Long.getLong(Integer.toString(v[3]))
-																					.longValue(),
-																			'&')))
-																	.intValue()))
-													.longValue(),
-											'|')))
-					.intValue();
-			Integer n3 = Integer
-					.getInteger(
-							Long.toString(
-									SupportBitwise
-											.bitwise(Long.getLong(Integer.toString(v[2]))
-													.longValue(),
-													Long
-															.getLong(
-																	Integer.toString(Integer
-																			.getInteger(Long.toString(
-																					SupportBitwise.bitwise(Long
-																							.getLong(
-																									Integer.toString(c))
-																							.longValue(),
-																							Long
-																									.getLong(
-																											Integer.toString(
-																													v[3]))
-																									.longValue(),
-																							'&')))
-																			.intValue()))
-															.longValue(),
-													'|')))
-					.intValue();
+			Integer n1 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[4])),Long.getLong(Integer.toString(c >> v[5])), '|'))).intValue());
+			Integer n2 = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])), Long.getLong(Integer.toString(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c >> v[1])).longValue(),Long.getLong(Integer.toString(v[3])).longValue(),'&'))).intValue())).longValue(),'|'))).intValue();
+			Integer n3 = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[2])).longValue(),Long.getLong(Integer.toString(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(c)).longValue(),Long.getLong(Integer.toString(v[3])).longValue(),'&'))).intValue())).longValue(),'|'))).intValue();
 			stream.write(n1.byteValue(), n2.byteValue(), n3.byteValue());
 		}
 		return c;
