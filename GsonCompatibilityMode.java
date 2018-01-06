@@ -535,124 +535,185 @@ public class GsonCompatibilityMode extends Config {
 		return c;
 	}
 
-	@Override
 	public com.jsoniter.spi.Decoder createDecoder(String cacheKey, Type type) {
 		if (Date.class == type) {
-			return new com.jsoniter.spi.Decoder() {
-				@Override
-				public Date decode(JsonIterator iter) throws IOException {
-					DateFormat dateFormat = builder().dateFormat.get();
-					try {
-						String input = iter.readString();
-						return dateFormat.parse(input);
-					} catch (java.text.ParseException e) {
-						throw new JsonException("Error: ParseException.");
-					}
-				}
-			};
+			return newDecDate();
 		} else if (String.class == type) {
-			return new com.jsoniter.spi.Decoder() {
-				@Override
-				public Object decode(JsonIterator iter) throws IOException {
-					ValueType valueType = iter.whatIsNext();
-					if (valueType == ValueType.STRING) {
-						return iter.readString();
-					} else if (valueType == ValueType.NUMBER) {
-						return iter.readNumberAsString();
-					} else if (valueType == ValueType.BOOLEAN) {
-						return iter.readBoolean() ? "true" : "false";
-					} else if (valueType == ValueType.NULL) {
-						iter.skip();
-						return null;
-					} else {
-						throw new JsonException("expect string, but found " + valueType);
-					}
-				}
-			};
+			return newDecString();
 		} else if (boolean.class == type) {
-			return new com.jsoniter.spi.Decoder.BooleanDecoder() {
-				@Override
-				public boolean decodeBoolean(JsonIterator iter) throws IOException {
-					ValueType valueType = iter.whatIsNext();
-					switch (valueType) {
-					case BOOLEAN:
-						return iter.readBoolean();
-					case NULL:
-						iter.skip();
-						return false;
-					default:
-						throw new JsonException("expect boolean, but found " + valueType);
-					}
-				}
-			};
+			return newDecBool();
 		} else if (long.class == type) {
-			return new com.jsoniter.spi.Decoder.LongDecoder() {
-				@Override
-				public long decodeLong(JsonIterator iter) throws IOException {
-					ValueType valueType = iter.whatIsNext();
-					switch (valueType) {
-					case NUMBER:
-						return iter.readLong();
-					case NULL:
-						iter.skip();
-						return 0;
-					default:
-						throw new JsonException("expect long, but found " + valueType);
-					}
-				}
-			};
+			return newDecLong();
 		} else if (int.class == type) {
-			return new com.jsoniter.spi.Decoder.IntDecoder() {
-				@Override
-				public int decodeInt(JsonIterator iter) throws IOException {
-					ValueType valueType = iter.whatIsNext();
-					switch(valueType){
-					case NUMBER:
-						return iter.readInt();
-					case NULL:
-						iter.skip();
-						return 0;
-					default:
-						throw new JsonException("expect int, but found " + valueType);
-					}
-				}
-			};
+			return newDecInt();
 		} else if (float.class == type) {
-			return new com.jsoniter.spi.Decoder.FloatDecoder() {
-				@Override
-				public float decodeFloat(JsonIterator iter) throws IOException {
-					ValueType valueType = iter.whatIsNext();
-					switch(valueType){
-					case NUMBER:
-						return iter.readFloat();
-					case NULL:
-						iter.skip();
-						final float n = 0.0f;
-						return  n;
-					default:
-						throw new JsonException("expect float, but found " + valueType);
-					}
-				}
-			};
+			return newDecFloat();
 		} else if (double.class == type) {
-			return new com.jsoniter.spi.Decoder.DoubleDecoder() {
-				@Override
-				public double decodeDouble(JsonIterator iter) throws IOException {
-					ValueType valueType = iter.whatIsNext();
-					switch(valueType){
-					case NUMBER:
-						return iter.readDouble();
-					case NULL:
-						iter.skip();
-						final double n = 0.0d;
-						return  n;
-					default:
-						throw new JsonException("expect float, but found " + valueType);
-					}
-				}
-			};
+			return newDecDouble();
 		}
 		return super.createDecoder(cacheKey, type);
+	}
+
+	/**
+	 * MaxiBon
+	 * 
+	 * @return
+	 */
+	private com.jsoniter.spi.Decoder newDecDate() {
+		return new com.jsoniter.spi.Decoder() {
+			@Override
+			public Date decode(JsonIterator iter) throws IOException {
+				DateFormat dateFormat = builder().dateFormat.get();
+				try {
+					String input = iter.readString();
+					return dateFormat.parse(input);
+				} catch (java.text.ParseException e) {
+					throw new JsonException("Error: ParseException.");
+				}
+			}
+		};
+	}
+
+	/**
+	 * MaxiBon
+	 * 
+	 * @return
+	 */
+	private com.jsoniter.spi.Decoder newDecString() {
+		return new com.jsoniter.spi.Decoder() {
+			@Override
+			public Object decode(JsonIterator iter) throws IOException {
+				ValueType valueType = iter.whatIsNext();
+				if (valueType == ValueType.STRING) {
+					return iter.readString();
+				} else if (valueType == ValueType.NUMBER) {
+					return iter.readNumberAsString();
+				} else if (valueType == ValueType.BOOLEAN) {
+					return iter.readBoolean() ? "true" : "false";
+				} else if (valueType == ValueType.NULL) {
+					iter.skip();
+					return null;
+				} else {
+					throw new JsonException("expect string, but found " + valueType);
+				}
+			}
+		};
+	}
+
+	/**
+	 * MaxiBon
+	 * 
+	 * @return
+	 */
+	private com.jsoniter.spi.Decoder newDecBool() {
+		return new com.jsoniter.spi.Decoder.BooleanDecoder() {
+			@Override
+			public boolean decodeBoolean(JsonIterator iter) throws IOException {
+				ValueType valueType = iter.whatIsNext();
+				switch (valueType) {
+				case BOOLEAN:
+					return iter.readBoolean();
+				case NULL:
+					iter.skip();
+					return false;
+				default:
+					throw new JsonException("expect boolean, but found " + valueType);
+				}
+			}
+		};
+	}
+
+	/**
+	 * MaxiBon
+	 * 
+	 * @return
+	 */
+	private com.jsoniter.spi.Decoder newDecLong() {
+		return new com.jsoniter.spi.Decoder.LongDecoder() {
+			@Override
+			public long decodeLong(JsonIterator iter) throws IOException {
+				ValueType valueType = iter.whatIsNext();
+				switch (valueType) {
+				case NUMBER:
+					return iter.readLong();
+				case NULL:
+					iter.skip();
+					return 0;
+				default:
+					throw new JsonException("expect long, but found " + valueType);
+				}
+			}
+		};
+	}
+
+	/**
+	 * MaxiBon
+	 * 
+	 * @return
+	 */
+	private com.jsoniter.spi.Decoder newDecInt() {
+		return new com.jsoniter.spi.Decoder.IntDecoder() {
+			@Override
+			public int decodeInt(JsonIterator iter) throws IOException {
+				ValueType valueType = iter.whatIsNext();
+				switch (valueType) {
+				case NUMBER:
+					return iter.readInt();
+				case NULL:
+					iter.skip();
+					return 0;
+				default:
+					throw new JsonException("expect int, but found " + valueType);
+				}
+			}
+		};
+	}
+
+	/**
+	 * MaxiBon
+	 * 
+	 * @return
+	 */
+	private com.jsoniter.spi.Decoder newDecFloat() {
+		return new com.jsoniter.spi.Decoder.FloatDecoder() {
+			public float decodeFloat(JsonIterator iter) throws IOException {
+				ValueType valueType = iter.whatIsNext();
+				switch (valueType) {
+				case NUMBER:
+					return iter.readFloat();
+				case NULL:
+					iter.skip();
+					final float n = 0.0f;
+					return n;
+				default:
+					throw new JsonException("expect float, but found " + valueType);
+				}
+			}
+		};
+	}
+
+	/**
+	 * MaxiBon
+	 * 
+	 * @return
+	 */
+	private com.jsoniter.spi.Decoder newDecDouble() {
+		return new com.jsoniter.spi.Decoder.DoubleDecoder() {
+			@Override
+			public double decodeDouble(JsonIterator iter) throws IOException {
+				ValueType valueType = iter.whatIsNext();
+				switch (valueType) {
+				case NUMBER:
+					return iter.readDouble();
+				case NULL:
+					iter.skip();
+					final double n = 0.0d;
+					return n;
+				default:
+					throw new JsonException("expect float, but found " + valueType);
+				}
+			}
+		};
 	}
 
 	public com.jsoniter.spi.Binding updateClassDescriptorSupp3(com.jsoniter.spi.Binding binding, String translated) {
