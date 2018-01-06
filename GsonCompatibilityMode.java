@@ -556,7 +556,7 @@ public class GsonCompatibilityMode extends Config {
 
 	/**
 	 * MaxiBon
-	 * 
+	 * @throws IOException
 	 * @return
 	 */
 	private com.jsoniter.spi.Decoder newDecDate() {
@@ -578,7 +578,7 @@ public class GsonCompatibilityMode extends Config {
 
 	/**
 	 * MaxiBon
-	 * 
+	 * @throws IOException
 	 * @return
 	 */
 	private com.jsoniter.spi.Decoder newDecString() {
@@ -606,7 +606,7 @@ public class GsonCompatibilityMode extends Config {
 
 	/**
 	 * MaxiBon
-	 * 
+	 * @throws IOException
 	 * @return
 	 */
 	private com.jsoniter.spi.Decoder newDecBool() {
@@ -631,7 +631,7 @@ public class GsonCompatibilityMode extends Config {
 
 	/**
 	 * MaxiBon
-	 * 
+	 * @throws IOException
 	 * @return
 	 */
 	private com.jsoniter.spi.Decoder newDecLong() {
@@ -656,7 +656,7 @@ public class GsonCompatibilityMode extends Config {
 
 	/**
 	 * MaxiBon
-	 * 
+	 * @throws IOException
 	 * @return
 	 */
 	private com.jsoniter.spi.Decoder newDecInt() {
@@ -681,7 +681,7 @@ public class GsonCompatibilityMode extends Config {
 
 	/**
 	 * MaxiBon
-	 * 
+	 * @throws IOException
 	 * @return
 	 */
 	private com.jsoniter.spi.Decoder newDecFloat() {
@@ -707,7 +707,7 @@ public class GsonCompatibilityMode extends Config {
 
 	/**
 	 * MaxiBon
-	 * 
+	 * @throws IOException
 	 * @return
 	 */
 	private com.jsoniter.spi.Decoder newDecDouble() {
