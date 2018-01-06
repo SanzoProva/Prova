@@ -41,6 +41,11 @@ public class GsonCompatibilityMode extends Config {
 	private final static int SURR2_LAST = 0xDFFF;
 	private static final String[] REPLACEMENT_CHARS;
 	private static final String[] HTML_SAFE_REPLACEMENT_CHARS;
+	private static final int ZERO = 0;
+	private static final int ZERO1 = 0;
+	private static final int ZERO2 = 0;
+	private static final int ZERO3 = 0;
+	private static final int ZERO4 = 0;
 
 	static {
 		REPLACEMENT_CHARS = new String[128];
@@ -733,10 +738,11 @@ public class GsonCompatibilityMode extends Config {
 
 	public com.jsoniter.spi.Binding updateClassDescriptorSupp3(com.jsoniter.spi.Binding binding, String translated) {
 		com.jsoniter.spi.Binding bin = binding;
+		final int one = 1;
 		bin.toNames = newStringArray(1);
-		bin.toNames[0] = translated;
-		bin.fromNames = newStringArray(1);
-		bin.fromNames[0] = translated;
+		bin.toNames[ZERO] = translated;
+		bin.fromNames = newStringArray(one);
+		bin.fromNames[ZERO] = translated;
 		return bin;
 	}
 	
@@ -748,10 +754,10 @@ public class GsonCompatibilityMode extends Config {
 		FieldNamingStrategy f = fNS;
 		com.jsoniter.spi.Binding bin = b;
 		if (bin.method != null) {
-			bin.toNames = newStringArray(0);
-			bin.fromNames = newStringArray(0);
+			bin.toNames = newStringArray(ZERO);
+			bin.fromNames = newStringArray(ZERO1);
 		}
-		boolean ciclomatic = ciclomatic(f != null,bin.field != null);
+		boolean ciclomatic = ciclomatic(f != null, bin.field != null);
 		if (ciclomatic) {
 			String translated = f.translateName(bin.field);
 			com.jsoniter.spi.Binding bind = updateClassDescriptorSupp3(bin, translated);
@@ -760,12 +766,12 @@ public class GsonCompatibilityMode extends Config {
 		if (builder().version != null) {
 			Since since = bin.getAnnotation(Since.class);
 			if (since != null && builder().version < since.value()) {
-				bin.toNames = newStringArray(0);
-				bin.fromNames = newStringArray(0);
+				bin.toNames = newStringArray(ZERO2);
+				bin.fromNames = newStringArray(ZERO3);
 			}
 			Until until = bin.getAnnotation(Until.class);
 			if (until != null && builder().version >= until.value()) {
-				bin.toNames = newStringArray(0);
+				bin.toNames = newStringArray(ZERO4);
 				bin.fromNames = newStringArray(0);
 			}
 		}
