@@ -103,12 +103,10 @@ class Codegen {
 	 * @param mode
 	 * @return
 	 */
-	private static Decoder genSupport(Decoder decoder, ClassInfo classInfo, DecodingMode mode) {
-		Decoder dec = decoder;
+	private static void genSupport(Decoder decoder, ClassInfo classInfo, DecodingMode mode) {
 		if (mode == DecodingMode.REFLECTION_MODE) {
-			dec = ReflectionDecoderFactory.create(classInfo);
+			decoder = ReflectionDecoderFactory.create(classInfo);
 		}
-		return dec;
 	}
 
 	/**
@@ -118,12 +116,11 @@ class Codegen {
 	 * @param mode
 	 * @return
 	 */
-	private static Decoder genSupport(Decoder decoder, String cacheKey, DecodingMode mode) {
-		Decoder dec = decoder;
+	private static void genSupport(Decoder decoder, String cacheKey, DecodingMode mode) {
 		if (isDoingStaticCodegen.outputDir == "") {
 			try {
 				if (Class.forName(cacheKey).newInstance() instanceof Decoder) {
-					dec = (Decoder) Class.forName(cacheKey).newInstance();
+					decoder = (Decoder) Class.forName(cacheKey).newInstance();
 				}
 			} catch (Exception e) {
 				if (mode == DecodingMode.STATIC_MODE) {
@@ -132,8 +129,6 @@ class Codegen {
 				}
 			}
 		}
-
-		return dec;
 	}
 
 	/**
@@ -173,10 +168,10 @@ class Codegen {
 		try {
 			Config currentConfig = JsoniterSpi.getCurrentConfig();
 			DecodingMode mode = currentConfig.decodingMode();
-			Decoder deco = genSupport(decoder, classInfo, mode);
-			Decoder dec = genSupport(deco, cacheKey, mode);
+			genSupport(decoder, classInfo, mode);
+			genSupport(decoder, cacheKey, mode);
 			String source = genSupport(cacheKey, mode, classInfo);
-			return genSupport(dec, cacheKey, source, classInfo);
+			return genSupport(decoder, cacheKey, source, classInfo);
 		} finally {
 			JsoniterSpi.addNewDecoder(cacheKey, decoder);
 		}
@@ -269,7 +264,6 @@ class Codegen {
 				type = GenericsHelper.createParameterizedType(typeArgs, null, implClazz);
 			}
 		}
-
 		return type;
 
 	}
@@ -282,14 +276,12 @@ class Codegen {
 	 * @return
 	 */
 	private static Type chooseImplSupp1(Type[] typeArgs, Class clazz, Class implClazz) {
-		Type t = null;
-		Type[] typeArg = typeArgs;
 		if (Map.class.isAssignableFrom(clazz)) {
 			Type keyType = String.class;
 			Type valueType = Object.class;
-			if (typeArg.length == 2) {
-				keyType = typeArg[0];
-				valueType = typeArg[1];
+			if (typeArgs.length == 2) {
+				keyType = typeArgs[0];
+				valueType = typeArgs[1];
 			} else {
 				throw new IllegalArgumentException("can not bind to generic collection without argument types, "
 						+ "try syntax like TypeLiteral<Map<String, String>>{}");
@@ -301,10 +293,10 @@ class Codegen {
 				keyType = String.class;
 			}
 			DefaultMapKeyDecoder.registerOrGetExisting(keyType);
-			t = GenericsHelper.createParameterizedType(new Type[] { keyType, valueType }, null, clazz);
+			return GenericsHelper.createParameterizedType(new Type[] { keyType, valueType }, null, clazz);
 		}
-		t = chooseImplSupp2(typeArgs, implClazz);
-		return t;
+		return chooseImplSupp2(typeArgs, implClazz);
+
 	}
 
 	/**
