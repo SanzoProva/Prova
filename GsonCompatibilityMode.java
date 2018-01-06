@@ -41,6 +41,8 @@ public class GsonCompatibilityMode extends Config {
 	private final static int SURR2_LAST = 0xDFFF;
 	private static final String[] REPLACEMENT_CHARS;
 	private static final String[] HTML_SAFE_REPLACEMENT_CHARS;
+	private final String[] newSA0 = newStringArray(0);	
+	private final String[] newSA1 = newStringArray(1);
 
 	static {
 		REPLACEMENT_CHARS = new String[128];
@@ -241,15 +243,13 @@ public class GsonCompatibilityMode extends Config {
 
 		public boolean equalSupp(Builder bull, boolean flag) {
 			Builder builder = bull;
-			boolean flag2 = flag;
-
-			if (excludeFieldsWithoutExposeAnnotation != builder.excludeFieldsWithoutExposeAnnotation) {
-				flag2 = false;
-			} else if (disableHtmlEscaping != builder.disableHtmlEscaping) {
-				flag2 = false;
-			} else if (!dateFormat.get().equals(builder.dateFormat.get())) {
-				flag2 = false;
-			} else if (fieldNamingStrategy != null ? !fieldNamingStrategy.equals(builder.fieldNamingStrategy)
+			boolean b1 = (excludeFieldsWithoutExposeAnnotation != builder.excludeFieldsWithoutExposeAnnotation);
+			boolean b2 = (disableHtmlEscaping != builder.disableHtmlEscaping);
+			boolean b3 = (!dateFormat.get().equals(builder.dateFormat.get()));
+			
+			boolean flag2 = b1 ? false : b2 ? false : b3 ? false : flag;
+			
+			if (fieldNamingStrategy != null ? !fieldNamingStrategy.equals(builder.fieldNamingStrategy)
 					: builder.fieldNamingStrategy != null) {
 				flag2 = false;
 			} else if (version != null ? (version.equals(builder.version) == false) : builder.version != null) {
@@ -259,6 +259,7 @@ public class GsonCompatibilityMode extends Config {
 					: builder.serializationExclusionStrategies != null) {
 				flag2 = false;
 			}
+			builder.toString();
 			return flag2;
 		}
 
@@ -357,10 +358,9 @@ public class GsonCompatibilityMode extends Config {
 					String value = encodeSupp7(obj);
 					stream.write('"');
 					int n = value.length();
-					for (int i = 0; i < n;) {
+					for (int i = 0; i < n;i++) {
 						int c = value.charAt(i);
 						c = encodeSupp5(c, stream, replacements, i, value, v);
-						i++;
 					}
 					stream.write('"');
 				}
@@ -448,12 +448,12 @@ public class GsonCompatibilityMode extends Config {
 	 * @param stream
 	 * @param replacements
 	 * @param i
-	 * @param value
+	 * @param stringa
 	 * @param v
 	 * @return
 	 * @throws IOException
 	 */
-	private int encodeSupp5(int c, JsonStream stream, String[] replacements, int i, String value, int[] v)
+	private int encodeSupp5(int c, JsonStream stream, String[] replacements, int i, String stringa, int[] v)
 			throws IOException {
 		int ret = c;
 		int index = i;
@@ -472,11 +472,11 @@ public class GsonCompatibilityMode extends Config {
 				encodeSupp2(stream, ret, v);
 			} else {
 				ret = encodeSupp3(ret, stream, v);
-				if (index >= value.length()) {
+				if (index >= stringa.length()) {
 					break;
 				}
 				index++;
-				ret = encodeSupp(value.charAt(index), ret, stream, v);
+				ret = encodeSupp(stringa.charAt(index), ret, stream, v);
 			}
 		}
 		return ret;
@@ -487,7 +487,7 @@ public class GsonCompatibilityMode extends Config {
 	 * @return
 	 */
 	private String[] encodeSupp6() {
-		final String[] ret;
+		String[] ret = {""};
 		if (builder().disableHtmlEscaping) {
 			ret = REPLACEMENT_CHARS;
 		} else {
@@ -524,7 +524,7 @@ public class GsonCompatibilityMode extends Config {
 		if (Date.class == type) {
 			return new com.jsoniter.spi.Decoder() {
 				@Override
-				public Object decode(JsonIterator iter) throws IOException {
+				public Date decode(JsonIterator iter) throws IOException {
 					DateFormat dateFormat = builder().dateFormat.get();
 					try {
 						String input = iter.readString();
@@ -590,12 +590,13 @@ public class GsonCompatibilityMode extends Config {
 				@Override
 				public int decodeInt(JsonIterator iter) throws IOException {
 					ValueType valueType = iter.whatIsNext();
-					if (valueType == ValueType.NUMBER) {
+					switch(valueType){
+					case NUMBER:
 						return iter.readInt();
-					} else if (valueType == ValueType.NULL) {
+					case NULL:
 						iter.skip();
 						return 0;
-					} else {
+					default:
 						throw new JsonException("expect int, but found " + valueType);
 					}
 				}
@@ -605,13 +606,13 @@ public class GsonCompatibilityMode extends Config {
 				@Override
 				public float decodeFloat(JsonIterator iter) throws IOException {
 					ValueType valueType = iter.whatIsNext();
-					if (valueType == ValueType.NUMBER) {
+					switch(valueType){
+					case NUMBER:
 						return iter.readFloat();
-					} else if (valueType == ValueType.NULL) {
+					case NULL:
 						iter.skip();
-						final float n = 0.0f;
-						return n;
-					} else {
+						return  0.0f;
+					default:
 						throw new JsonException("expect float, but found " + valueType);
 					}
 				}
@@ -621,13 +622,13 @@ public class GsonCompatibilityMode extends Config {
 				@Override
 				public double decodeDouble(JsonIterator iter) throws IOException {
 					ValueType valueType = iter.whatIsNext();
-					if (valueType == ValueType.NUMBER) {
+					switch(valueType){
+					case NUMBER:
 						return iter.readDouble();
-					} else if (valueType == ValueType.NULL) {
+					case NULL:
 						iter.skip();
-						final double n = 0.0d;
-						return n;
-					} else {
+						return  0.0d;
+					default:
 						throw new JsonException("expect float, but found " + valueType);
 					}
 				}
@@ -638,9 +639,9 @@ public class GsonCompatibilityMode extends Config {
 
 	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding, String translated) {
 		com.jsoniter.spi.Binding bin = binding;
-		bin.toNames = newStringArray(1);
+		bin.toNames = newSA1;
 		bin.toNames[0] = translated;
-		bin.fromNames = newStringArray(1);
+		bin.fromNames = newSA1;
 		bin.fromNames[0] = translated;
 		return bin;
 	}
@@ -650,8 +651,8 @@ public class GsonCompatibilityMode extends Config {
 		FieldNamingStrategy f = fieldNamingStrategy;
 		com.jsoniter.spi.Binding bin = binding;
 		if (bin.method != null) {
-			bin.toNames = newStringArray(0);
-			bin.fromNames = newStringArray(0);
+			bin.toNames = newSA0;
+			bin.fromNames = newSA0;
 		}
 		if (f != null && bin.field != null) {
 			String translated = f.translateName(bin.field);
@@ -661,13 +662,13 @@ public class GsonCompatibilityMode extends Config {
 		if (builder().version != null) {
 			Since since = bin.getAnnotation(Since.class);
 			if (since != null && builder().version < since.value()) {
-				bin.toNames = newStringArray(0);
-				bin.fromNames = newStringArray(0);
+				bin.toNames = newSA0;
+				bin.fromNames = newSA0;
 			}
 			Until until = bin.getAnnotation(Until.class);
 			if (until != null && builder().version >= until.value()) {
-				bin.toNames = newStringArray(0);
-				bin.fromNames = newStringArray(0);
+				bin.toNames = newSA0;
+				bin.fromNames = newSA0;
 			}
 		}
 		return bin;
