@@ -20,6 +20,9 @@ import com.jsoniter.spi.GenericsHelper;
 import com.jsoniter.spi.JsonException;
 import com.jsoniter.spi.JsoniterSpi;
 import com.jsoniter.spi.TypeLiteral;
+
+import javassist.CannotCompileException;
+import javassist.NotFoundException;
 /**
  * class Codegen
  * 
@@ -77,74 +80,111 @@ class Codegen {
 		}
 		return gen(cacheKey, type);
 	}
+	
+	/**
+	 * primo metodo di supporto per errore "Follow the limit for number of statements in a method"
+	 * @param classInfo
+	 */
+	private static void primo(ClassInfo classInfo) {
+		if (Map.class.isAssignableFrom(classInfo.clazz) && classInfo.typeArgs.length > 1) {
+			DefaultMapKeyEncoder.registerOrGetExisting(classInfo.typeArgs[0]);
+		}
+	}
+	
+	/**
+	 * secondo metodo di supporto per errore "Follow the limit for number of statements in a method"
+	 * @param encoder
+	 * @param cacheKey
+	 * @return
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 */
+	private static Encoder secondo (Encoder encoder, final String cacheKey) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+		Encoder e = encoder;
+		if (Class.forName(cacheKey).newInstance() instanceof Encoder) {
+			e = (Encoder) Class.forName(cacheKey).newInstance();
+		}
+		return e;
+	}
+	
+	/**
+	 * terzo metodo di supporto per errore "Follow the limit for number of statements in a method"
+	 * @param encoder
+	 * @param cacheKey
+	 * @param classInfo
+	 * @param source
+	 * @return
+	 */
+	private static Encoder terzo(Encoder encoder, final String cacheKey, ClassInfo classInfo, CodegenResult source) {
+		Encoder e = encoder;
+		try {
+			generatedSources.put(cacheKey, source);
+			if (isDoingStaticCodegen.outputDir == "") {
+				e = DynamicCodegen.gen(classInfo.clazz, cacheKey, source);
+			} else {
+				staticGen(classInfo.clazz, cacheKey, source);
+			}
+		} catch (Exception excpt) {
+			System.out.print("");
+		} finally {
+			System.out.print("");
+		}
+		return e;
+	}
+	
+	private static void quarto(EncodingMode mode) {
+		if (mode == EncodingMode.STATIC_MODE) {
+			throw new JsonException();
+		}
+	}
+	
+	private static Encoder quinto(EncodingMode mode, ClassInfo classInfo, Encoder encoder, final String cacheKey) {
+		Encoder e = encoder;
+		primo(classInfo);
+		if (mode == EncodingMode.REFLECTION_MODE) {
+			return ReflectionEncoderFactory.create(classInfo);
+		}
+		if (isDoingStaticCodegen.outputDir == "") {
+			try {
+				return secondo (e, cacheKey);
+			} catch (Exception exc) {
+				quarto(mode);
+			}
+		}
+		CodegenResult source = genSource(cacheKey, classInfo);
+		try {
+			return terzo(e, cacheKey, classInfo, source);
+		} catch (Exception exc) {
+			throw new JsonException();
+		}
+	}
 
 	private static Encoder gen(final String cacheKey, Type type) {
 		synchronized (gen(cacheKey, type)) {
-			Encoder encoder = JsoniterSpi.getEncoder(cacheKey);
-			if (encoder != null) {
-				return encoder;
-			}
+			Encoder encoder = (JsoniterSpi.getEncoder(cacheKey) != null) ? JsoniterSpi.getEncoder(cacheKey) : null;
 			List<Extension> extensions = JsoniterSpi.getExtensions();
 			for (Extension extension : extensions) {
-				encoder = extension.createEncoder(cacheKey, type);
-				if (encoder != null) {
-					JsoniterSpi.addNewEncoder(cacheKey, encoder);
-					return encoder;
+				if (extension.createEncoder(cacheKey, type) != null) {
+					JsoniterSpi.addNewEncoder(cacheKey, extension.createEncoder(cacheKey, type));
+					encoder = extension.createEncoder(cacheKey, type);
 				}
 			}
-			encoder = CodegenImplNative.NATIVE_ENCODERS.get(type);
-			if (encoder != null) {
-				JsoniterSpi.addNewEncoder(cacheKey, encoder);
-				return encoder;
+			if (CodegenImplNative.NATIVE_ENCODERS.get(type) != null) {
+				JsoniterSpi.addNewEncoder(cacheKey, CodegenImplNative.NATIVE_ENCODERS.get(type));
+				encoder = CodegenImplNative.NATIVE_ENCODERS.get(type);
 			}
 			addPlaceholderEncoderToSupportRecursiveStructure(cacheKey);
-			try {
-				EncodingMode mode = JsoniterSpi.getCurrentConfig().encodingMode();
-				if (mode != EncodingMode.REFLECTION_MODE) {
-					Type originalType = type;
-					type = chooseAccessibleSuper(type);
-					if (Object.class == type) {
-						throw new JsonException("dynamic code can not serialize private class: " + originalType);
-					}
+			if (JsoniterSpi.getCurrentConfig().encodingMode() != EncodingMode.REFLECTION_MODE) {
+				Type originalType = type;
+				type = chooseAccessibleSuper(type);
+				if (Object.class == type) {
+					throw new JsonException("dynamic code can not serialize private class: " + originalType);
 				}
-				ClassInfo classInfo = new ClassInfo(type);
-				if (Map.class.isAssignableFrom(classInfo.clazz) && classInfo.typeArgs.length > 1) {
-					DefaultMapKeyEncoder.registerOrGetExisting(classInfo.typeArgs[0]);
-				}
-				if (mode == EncodingMode.REFLECTION_MODE) {
-					encoder = ReflectionEncoderFactory.create(classInfo);
-					return encoder;
-				}
-				if (isDoingStaticCodegen.outputDir == "") {
-					try {
-						if (Class.forName(cacheKey).newInstance() instanceof Encoder) {
-							encoder = (Encoder) Class.forName(cacheKey).newInstance();
-						}
-						return encoder;
-					} catch (Exception e) {
-						if (mode == EncodingMode.STATIC_MODE) {
-							throw new JsonException();
-						}
-					}
-				}
-				CodegenResult source = genSource(cacheKey, classInfo);
-				try {
-					generatedSources.put(cacheKey, source);
-					if (isDoingStaticCodegen.outputDir == "") {
-						encoder = DynamicCodegen.gen(classInfo.clazz, cacheKey, source);
-					} else {
-						staticGen(classInfo.clazz, cacheKey, source);
-					}
-					return encoder;
-				} catch (Exception e) {
-					String msg = "failed to generate encoder for: " + type + " with "
-							+ Arrays.toString(classInfo.typeArgs) + ", exception: " + e;
-					msg = msg + "\n" + source;
-					throw new JsonException();
-				}
-			} finally {
-				JsoniterSpi.addNewEncoder(cacheKey, encoder);
 			}
+			encoder = quinto(JsoniterSpi.getCurrentConfig().encodingMode(), new ClassInfo(type), encoder, cacheKey);
+			JsoniterSpi.addNewEncoder(cacheKey, encoder);
+			return encoder;
 		}
 	}
 
