@@ -239,55 +239,56 @@ public class GsonCompatibilityMode extends Config {
 			return new GsonCompatibilityMode(configName, this);
 		}
 
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-
-			if (super.equals(o) == false) {
-				return false;
-			}
-
-			Builder builder = null;
-			if (o instanceof Builder) {
-				builder = (Builder) o;
-			}
+		public boolean equalSupp(Builder bull, boolean flag) {
+			Builder builder = bull;
+			boolean flag2 = flag;
 
 			if (excludeFieldsWithoutExposeAnnotation != builder.excludeFieldsWithoutExposeAnnotation) {
-				return false;
-			}
-
-			if (disableHtmlEscaping != builder.disableHtmlEscaping) {
-				return false;
-			}
-
-			if (!dateFormat.get().equals(builder.dateFormat.get())) {
-				return false;
-			}
-
-			if (fieldNamingStrategy != null ? !fieldNamingStrategy.equals(builder.fieldNamingStrategy)
+				flag2 = false;
+			} else if (disableHtmlEscaping != builder.disableHtmlEscaping) {
+				flag2 = false;
+			} else if (!dateFormat.get().equals(builder.dateFormat.get())) {
+				flag2 = false;
+			} else if (fieldNamingStrategy != null ? !fieldNamingStrategy.equals(builder.fieldNamingStrategy)
 					: builder.fieldNamingStrategy != null) {
-				return false;
-			}
-
-			if (version != null ? (version.equals(builder.version) == false) : builder.version != null) {
-				return false;
-			}
-
-			if (serializationExclusionStrategies != null
+				flag2 = false;
+			} else if (version != null ? (version.equals(builder.version) == false) : builder.version != null) {
+				flag2 = false;
+			} else if (serializationExclusionStrategies != null
 					? !serializationExclusionStrategies.equals(builder.serializationExclusionStrategies)
 					: builder.serializationExclusionStrategies != null) {
-				return false;
+				flag2 = false;
+			}
+			return flag2;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			boolean flag = false;
+			boolean supp = false;
+			Builder builder = null;
+			if (this == o) {
+				flag = true;
+				supp = true;
+			} else if (o == null || getClass() != o.getClass()) {
+				flag = false;
+				supp = true;
+			} else if (super.equals(o) == false) {
+				flag = false;
+				supp = true;
+			} else if (o instanceof Builder) {
+				builder = (Builder) o;
+				supp = true;
 			}
 
-			return deserializationExclusionStrategies != null
-					? deserializationExclusionStrategies.equals(builder.deserializationExclusionStrategies)
-					: builder.deserializationExclusionStrategies == null;
+			if (supp == false) {
+				flag = equalSupp(builder, flag);
+			} else {
+				flag = deserializationExclusionStrategies != null
+						? deserializationExclusionStrategies.equals(builder.deserializationExclusionStrategies)
+						: builder.deserializationExclusionStrategies == null;
+			}
+			return flag;
 		}
 
 		@Override
@@ -367,7 +368,7 @@ public class GsonCompatibilityMode extends Config {
 		}
 		return super.createEncoder(cacheKey, type);
 	}
-	
+
 	/**
 	 * 
 	 * @param c
@@ -380,11 +381,11 @@ public class GsonCompatibilityMode extends Config {
 	private int encodeSupp(int c, int firstPart, JsonStream stream, int[] v) throws IOException {
 		int ret = c;
 		if (ret < SURR2_FIRST || ret > SURR2_LAST) {
-			throw new JsonException(
-					"Broken surrogate pair: first char 0x" + Integer.toHexString(firstPart) + ", second 0x" + Integer.toHexString(c) + "; illegal combination");
+			throw new JsonException("Broken surrogate pair: first char 0x" + Integer.toHexString(firstPart)
+					+ ", second 0x" + Integer.toHexString(c) + "; illegal combination");
 		}
 		ret = 0x10000 + ((firstPart - SURR1_FIRST) << 10) + (c - SURR2_FIRST);
-		if (ret > 0x10FFFF) { 
+		if (ret > 0x10FFFF) {
 			throw new JsonException("illegalSurrogate");
 		}
 		Integer n1 = Integer.valueOf(Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(v[6])).longValue(),Long.getLong(Integer.toString(c >> v[7])).longValue(), '|'))).intValue());
@@ -411,10 +412,10 @@ public class GsonCompatibilityMode extends Config {
 	/**
 	 * 
 	 * @param c
-	 * @param stream 
-	 * @param v 
-	 * @return 
-	 * @throws IOException 
+	 * @param stream
+	 * @param v
+	 * @return
+	 * @throws IOException
 	 */
 	private int encodeSupp3(int c, JsonStream stream, int[] v) throws IOException {
 		int ret = c;
@@ -424,7 +425,7 @@ public class GsonCompatibilityMode extends Config {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * 
 	 * @param stream
@@ -440,7 +441,7 @@ public class GsonCompatibilityMode extends Config {
 			stream.writeRaw(ret);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param c
@@ -452,7 +453,8 @@ public class GsonCompatibilityMode extends Config {
 	 * @return
 	 * @throws IOException
 	 */
-	private int encodeSupp5(int c, JsonStream stream, String[] replacements, int i, String value, int[] v) throws IOException {
+	private int encodeSupp5(int c, JsonStream stream, String[] replacements, int i, String value, int[] v)
+			throws IOException {
 		int ret = c;
 		int index = i;
 		switch (ret) {
@@ -479,6 +481,7 @@ public class GsonCompatibilityMode extends Config {
 		}
 		return ret;
 	}
+
 	/**
 	 * 
 	 * @return
@@ -492,7 +495,12 @@ public class GsonCompatibilityMode extends Config {
 		}
 		return ret;
 	}
-	
+
+	/**
+	 * 
+	 * @param obj
+	 * @return
+	 */
 	private String encodeSupp7(Object obj) {
 		String value = null;
 		if (obj instanceof String) {
@@ -628,33 +636,63 @@ public class GsonCompatibilityMode extends Config {
 		return super.createDecoder(cacheKey, type);
 	}
 
+	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding, String translated) {
+		com.jsoniter.spi.Binding bin = binding;
+		bin.toNames = newStringArray(1);
+		bin.toNames[0] = translated;
+		bin.fromNames = newStringArray(1);
+		bin.fromNames[0] = translated;
+		return bin;
+	}
+
+	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding,
+			FieldNamingStrategy fieldNamingStrategy) {
+		FieldNamingStrategy f = fieldNamingStrategy;
+		com.jsoniter.spi.Binding bin = binding;
+		if (bin.method != null) {
+			bin.toNames = newStringArray(0);
+			bin.fromNames = newStringArray(0);
+		}
+		if (f != null && bin.field != null) {
+			String translated = f.translateName(bin.field);
+			com.jsoniter.spi.Binding bind = updateClassDescriptorSupp(bin, translated);
+			bin = bind;
+		}
+		if (builder().version != null) {
+			Since since = bin.getAnnotation(Since.class);
+			if (since != null && builder().version < since.value()) {
+				bin.toNames = newStringArray(0);
+				bin.fromNames = newStringArray(0);
+			}
+			Until until = bin.getAnnotation(Until.class);
+			if (until != null && builder().version >= until.value()) {
+				bin.toNames = newStringArray(0);
+				bin.fromNames = newStringArray(0);
+			}
+		}
+		return bin;
+	}
+
+	public com.jsoniter.spi.Binding updateClassDescriptorSupp(com.jsoniter.spi.Binding binding) {
+		com.jsoniter.spi.Binding bin = binding;
+		for (ExclusionStrategy strategy : builder().deserializationExclusionStrategies) {
+			if (strategy.shouldSkipClass(bin.clazz)) {
+				bin.fromNames = new String[0];
+				continue;
+			}
+			if (strategy.shouldSkipField(new FieldAttributes(bin.field))) {
+				bin.fromNames = new String[0];
+			}
+		}
+		return bin;
+	}
+
 	@Override
 	public void updateClassDescriptor(com.jsoniter.spi.ClassDescriptor desc) {
 		FieldNamingStrategy fieldNamingStrategy = builder().fieldNamingStrategy;
 		for (com.jsoniter.spi.Binding binding : desc.allBindings()) {
-			if (binding.method != null) {
-				binding.toNames = newStringArray(0);
-				binding.fromNames = newStringArray(0);
-			}
-			if (fieldNamingStrategy != null && binding.field != null) {
-				String translated = fieldNamingStrategy.translateName(binding.field);
-				binding.toNames = newStringArray(1);
-				binding.toNames[0] = translated;
-				binding.fromNames = newStringArray(1);
-				binding.fromNames[0] = translated;
-			}
-			if (builder().version != null) {
-				Since since = binding.getAnnotation(Since.class);
-				if (since != null && builder().version < since.value()) {
-					binding.toNames = newStringArray(0);
-					binding.fromNames = newStringArray(0);
-				}
-				Until until = binding.getAnnotation(Until.class);
-				if (until != null && builder().version >= until.value()) {
-					binding.toNames = newStringArray(0);
-					binding.fromNames = newStringArray(0);
-				}
-			}
+			com.jsoniter.spi.Binding bin = updateClassDescriptorSupp(binding, fieldNamingStrategy);
+			binding = bin;
 			for (ExclusionStrategy strategy : builder().serializationExclusionStrategies) {
 				if (strategy.shouldSkipClass(binding.clazz)) {
 					binding.toNames = new String[0];
@@ -664,15 +702,8 @@ public class GsonCompatibilityMode extends Config {
 					binding.toNames = new String[0];
 				}
 			}
-			for (ExclusionStrategy strategy : builder().deserializationExclusionStrategies) {
-				if (strategy.shouldSkipClass(binding.clazz)) {
-					binding.fromNames = new String[0];
-					continue;
-				}
-				if (strategy.shouldSkipField(new FieldAttributes(binding.field))) {
-					binding.fromNames = new String[0];
-				}
-			}
+			com.jsoniter.spi.Binding bin1 = updateClassDescriptorSupp(binding);
+			binding = bin1;
 		}
 		super.updateClassDescriptor(desc);
 	}
