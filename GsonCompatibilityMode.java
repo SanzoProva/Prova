@@ -561,7 +561,9 @@ public class GsonCompatibilityMode extends Config {
 	 */
 	private com.jsoniter.spi.Decoder newDecDate() {
 		return new com.jsoniter.spi.Decoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public Date decode(JsonIterator iter) throws IOException {
 				DateFormat dateFormat = builder().dateFormat.get();
 				try {
@@ -581,7 +583,9 @@ public class GsonCompatibilityMode extends Config {
 	 */
 	private com.jsoniter.spi.Decoder newDecString() {
 		return new com.jsoniter.spi.Decoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public Object decode(JsonIterator iter) throws IOException {
 				ValueType valueType = iter.whatIsNext();
 				if (valueType == ValueType.STRING) {
@@ -607,7 +611,9 @@ public class GsonCompatibilityMode extends Config {
 	 */
 	private com.jsoniter.spi.Decoder newDecBool() {
 		return new com.jsoniter.spi.Decoder.BooleanDecoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public boolean decodeBoolean(JsonIterator iter) throws IOException {
 				ValueType valueType = iter.whatIsNext();
 				switch (valueType) {
@@ -630,7 +636,9 @@ public class GsonCompatibilityMode extends Config {
 	 */
 	private com.jsoniter.spi.Decoder newDecLong() {
 		return new com.jsoniter.spi.Decoder.LongDecoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public long decodeLong(JsonIterator iter) throws IOException {
 				ValueType valueType = iter.whatIsNext();
 				switch (valueType) {
@@ -653,7 +661,9 @@ public class GsonCompatibilityMode extends Config {
 	 */
 	private com.jsoniter.spi.Decoder newDecInt() {
 		return new com.jsoniter.spi.Decoder.IntDecoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public int decodeInt(JsonIterator iter) throws IOException {
 				ValueType valueType = iter.whatIsNext();
 				switch (valueType) {
@@ -676,6 +686,9 @@ public class GsonCompatibilityMode extends Config {
 	 */
 	private com.jsoniter.spi.Decoder newDecFloat() {
 		return new com.jsoniter.spi.Decoder.FloatDecoder() {
+			/**
+			 * @throws IOException
+			 */
 			public float decodeFloat(JsonIterator iter) throws IOException {
 				ValueType valueType = iter.whatIsNext();
 				switch (valueType) {
@@ -699,7 +712,9 @@ public class GsonCompatibilityMode extends Config {
 	 */
 	private com.jsoniter.spi.Decoder newDecDouble() {
 		return new com.jsoniter.spi.Decoder.DoubleDecoder() {
-			@Override
+			/**
+			 * @throws IOException
+			 */
 			public double decodeDouble(JsonIterator iter) throws IOException {
 				ValueType valueType = iter.whatIsNext();
 				switch (valueType) {
