@@ -227,12 +227,12 @@ class Codegen {
 			if (type instanceof ParameterizedType) {
 				pType = (ParameterizedType) type;
 			}
-			if (pType.getRawType().getClass().equals(Class.class)) {
+			if (pType.getRawType() instanceof Class) {
 				clazz = (Class) pType.getRawType();
 			}
 			typeArgs = pType.getActualTypeArguments();
 		} else {
-			if (type.getClass().equals(Class.class)) {
+			if (type instanceof Class) {
 				clazz = (Class) type;
 			}
 		}
