@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +20,6 @@ import com.jsoniter.spi.JsonException;
 import com.jsoniter.spi.JsoniterSpi;
 import com.jsoniter.spi.TypeLiteral;
 
-import javassist.CannotCompileException;
-import javassist.NotFoundException;
 /**
  * class Codegen
  * 
@@ -80,9 +77,11 @@ class Codegen {
 		}
 		return gen(cacheKey, type);
 	}
-	
+
 	/**
-	 * primo metodo di supporto per errore "Follow the limit for number of statements in a method"
+	 * primo metodo di supporto per errore "Follow the limit for number of
+	 * statements in a method"
+	 * 
 	 * @param classInfo
 	 */
 	private static void primo(ClassInfo classInfo) {
@@ -90,9 +89,11 @@ class Codegen {
 			DefaultMapKeyEncoder.registerOrGetExisting(classInfo.typeArgs[0]);
 		}
 	}
-	
+
 	/**
-	 * secondo metodo di supporto per errore "Follow the limit for number of statements in a method"
+	 * secondo metodo di supporto per errore "Follow the limit for number of
+	 * statements in a method"
+	 * 
 	 * @param encoder
 	 * @param cacheKey
 	 * @return
@@ -100,16 +101,19 @@ class Codegen {
 	 * @throws IllegalAccessException
 	 * @throws ClassNotFoundException
 	 */
-	private static Encoder secondo (Encoder encoder, final String cacheKey) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+	private static Encoder secondo(Encoder encoder, final String cacheKey)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		Encoder e = encoder;
 		if (Class.forName(cacheKey).newInstance() instanceof Encoder) {
 			e = (Encoder) Class.forName(cacheKey).newInstance();
 		}
 		return e;
 	}
-	
+
 	/**
-	 * terzo metodo di supporto per errore "Follow the limit for number of statements in a method"
+	 * terzo metodo di supporto per errore "Follow the limit for number of
+	 * statements in a method"
+	 * 
 	 * @param encoder
 	 * @param cacheKey
 	 * @param classInfo
@@ -132,13 +136,13 @@ class Codegen {
 		}
 		return e;
 	}
-	
+
 	private static void quarto(EncodingMode mode) {
 		if (mode == EncodingMode.STATIC_MODE) {
 			throw new JsonException();
 		}
 	}
-	
+
 	private static Encoder quinto(EncodingMode mode, ClassInfo classInfo, Encoder encoder, final String cacheKey) {
 		Encoder e = encoder;
 		primo(classInfo);
@@ -147,7 +151,7 @@ class Codegen {
 		}
 		if (isDoingStaticCodegen.outputDir == "") {
 			try {
-				return secondo (e, cacheKey);
+				return secondo(e, cacheKey);
 			} catch (Exception exc) {
 				quarto(mode);
 			}
@@ -176,13 +180,11 @@ class Codegen {
 			}
 			addPlaceholderEncoderToSupportRecursiveStructure(cacheKey);
 			if (JsoniterSpi.getCurrentConfig().encodingMode() != EncodingMode.REFLECTION_MODE) {
-				Type originalType = type;
-				type = chooseAccessibleSuper(type);
-				if (Object.class == type) {
-					throw new JsonException("dynamic code can not serialize private class: " + originalType);
+				if (Object.class == chooseAccessibleSuper(type)) {
+					throw new JsonException("dynamic code can not serialize private class: " + type);
 				}
 			}
-			encoder = quinto(JsoniterSpi.getCurrentConfig().encodingMode(), new ClassInfo(type), encoder, cacheKey);
+			encoder = quinto(JsoniterSpi.getCurrentConfig().encodingMode(), new ClassInfo(chooseAccessibleSuper(type)), encoder, cacheKey);
 			JsoniterSpi.addNewEncoder(cacheKey, encoder);
 			return encoder;
 		}
@@ -225,13 +227,14 @@ class Codegen {
 			if (type instanceof ParameterizedType) {
 				pType = (ParameterizedType) type;
 			}
-			clazz = (Class) pType.getRawType();
+			if (pType.getRawType().getClass().equals(Class.class)) {
+				clazz = (Class) pType.getRawType();
+			}
 			typeArgs = pType.getActualTypeArguments();
 		} else {
-			if (type instanceof Class) {
+			if (type.getClass().equals(Class.class)) {
 				clazz = (Class) type;
 			}
-
 		}
 		if (Modifier.isPublic(clazz.getModifiers())) {
 			return type;
