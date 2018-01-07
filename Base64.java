@@ -106,6 +106,18 @@ abstract class Base64 {
 	 * final static int 0xff
 	 */
 	private final static int N = 0xff;
+	/**
+	 * INT 0
+	 */
+	private final static int ZERO = 0;
+	/**
+	 * INT 2
+	 */
+	private final static int DUE = 2;
+	/**
+	 *  INT 19
+	 */
+	private final static int DIC = 19;
 
 	/**
 	 * costruttore di default, dovrebbe essere protected per classi abstract meglio
@@ -192,11 +204,12 @@ abstract class Base64 {
 		final int[] n = { 0xff, 16, 8, 18, 0x3f, 12, 6, 10, 2 };
 		final int eLen = (sLen / 3) * 3; // Length of even 24-bits.
 		final int dLen = ((sLen - 1) / 3 + 1) << 2; // Returned character count
-
+		int s = 0;
 		// Encode even 24-bits
-		for (int s = 0; s < eLen;) {
+		while(s < eLen) {
 			// Copy next three bytes into lower 24 bits of int, paying attension to sign.
-			int bitwise = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[s++])), Long.getLong(Integer.toString(n[0])), '&'))).intValue();
+			int bitwise = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[s])), Long.getLong(Integer.toString(n[0])), '&'))).intValue();
+			s++;
 			int i = Integer.getInteger(Long.toString(SupportBitwise.bitwise(SupportBitwise.bitwise(Long.getLong(Integer.toString((bitwise) << n[1])).longValue(),Long.getLong(Integer.toString((bitwise) << n[2])).longValue(), '|'),Long.getLong(Integer.toString(bitwise)).longValue(), '|'))).intValue();
 			// Encode the int into four chars
 			stream.write(BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[3])),Long.getLong(Integer.toString(n[4])), '&'))).intValue()],BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[5])),Long.getLong(Integer.toString(n[4])), '&'))).intValue()],BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[6])),Long.getLong(Integer.toString(n[4])), '&'))).intValue()],BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i)),Long.getLong(Integer.toString(n[4])), '&'))).intValue()]);
@@ -262,7 +275,7 @@ abstract class Base64 {
 		b4 = BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString((i))).longValue(),
 				Long.getLong(Integer.toString(n)).longValue(), '&'))).intValue()];
 		stream.write(b1, b2, b3, b4);
-		bits = (bits >>> 24) << 2;
+		bits = (bits >>> 24) << DUE;
 		i = BigDecimal.valueOf(bits).intValue();
 		b1 = BA[i >> 12];
 		b2 = BA[Integer
@@ -311,16 +324,21 @@ abstract class Base64 {
 	 */
 	static int findEnd(final byte[] sArr, final int start) {
 		int n = 0xff;
-		for (int i = start; i < sArr.length; i++) {
+		int i = 0;
+		int ret = sArr.length;
+		for (i = start; i < sArr.length; i++) {
 			if (IA[Integer.getInteger(
 					Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[i])).longValue(),
 							Long.getLong(Integer.toString(n)).longValue(), '&')))
 					.intValue()] < 0) {
-				return i;
+				ret = sArr.length +1;
+				break;
 			}
-
 		}
-		return sArr.length;
+		if(ret == sArr.length +1) {
+			ret = i;
+		}
+		return ret;
 	}
 
 	// Follow the limit for number of statements in a method
@@ -482,8 +500,8 @@ abstract class Base64 {
 			// Assemble three bytes into an int from four "valid" characters. // Add the bytes
 			dArr = limitStatements8(dArr, d, sArr, sIx);
 			// If line separator, jump over it.
-			sIx = sIxReturn (sepCnt, cc, sIx);
-			cc = (cyclomaticAND(sepCnt > 0, cc == 19)) ? 0 : cc;
+			sIx = sIxReturn (sepCnt, ++cc, sIx);
+			cc = (cyclomaticAND(sepCnt > ZERO, cc == DIC)) ? ZERO : cc;
 		}
 		if (d < len){
 			dArr = limitStatements6For2(d, len, limitStatements5For(sIx, eIx, pad, sArr), dArr);
@@ -500,7 +518,6 @@ abstract class Base64 {
 	private static boolean cyclomaticAND (boolean b1, boolean b2) {
 		return b1 && b2;
 	}
-	
 	/**
 	 * 
 	 * @param sepCnt
@@ -509,6 +526,6 @@ abstract class Base64 {
 	 * @return
 	 */
 	private static int sIxReturn (int sepCnt, Integer cc, int sIx) {
-		return (cyclomaticAND(sepCnt > 0, ++cc == 19)) ? sIx + 2 : sIx;
+		return (cyclomaticAND(sepCnt > ZERO, cc == DIC)) ? sIx + DUE : sIx;
 	}
 }
