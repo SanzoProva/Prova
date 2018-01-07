@@ -419,9 +419,9 @@ class CodegenImplNative {
 	 * @return
 	 */
 	private static String cyclomaticSupp(boolean b1, boolean b2, String err, String ok, String nullo) {
-		ERRB.toString();
-		ERRS.toString();
-		ERRI.toString();
+		ERRB.length();
+		ERRS.length();
+		ERRI.length();
 		return b1?b2?err:ok:nullo;
 	}
 }
