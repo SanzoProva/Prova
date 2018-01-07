@@ -87,11 +87,7 @@ import java.util.Arrays;
  * @version 2.2
  * @author Mikael Grev Date: 2004-aug-02 Time: 11:31:11
  */
-/**
- * 
- * @author MaxiBon
- *
- */
+
 abstract class Base64 {
 
 	/**
@@ -115,7 +111,7 @@ abstract class Base64 {
 	 * costruttore di default, dovrebbe essere protected per classi abstract meglio
 	 * privato a causa di utilizzo di variabili e metodi statici
 	 */
-	protected Base64() {
+	private Base64() {
 	}
 
 	/**
@@ -196,12 +192,11 @@ abstract class Base64 {
 		final int[] n = { 0xff, 16, 8, 18, 0x3f, 12, 6, 10, 2 };
 		final int eLen = (sLen / 3) * 3; // Length of even 24-bits.
 		final int dLen = ((sLen - 1) / 3 + 1) << 2; // Returned character count
-		int s=0;
+
 		// Encode even 24-bits
-		while(s < eLen) {
+		for (int s = 0; s < eLen;) {
 			// Copy next three bytes into lower 24 bits of int, paying attension to sign.
-			int bitwise = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[s])), Long.getLong(Integer.toString(n[0])), '&'))).intValue();
-			s++;
+			int bitwise = Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[s++])), Long.getLong(Integer.toString(n[0])), '&'))).intValue();
 			int i = Integer.getInteger(Long.toString(SupportBitwise.bitwise(SupportBitwise.bitwise(Long.getLong(Integer.toString((bitwise) << n[1])).longValue(),Long.getLong(Integer.toString((bitwise) << n[2])).longValue(), '|'),Long.getLong(Integer.toString(bitwise)).longValue(), '|'))).intValue();
 			// Encode the int into four chars
 			stream.write(BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[3])),Long.getLong(Integer.toString(n[4])), '&'))).intValue()],BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[5])),Long.getLong(Integer.toString(n[4])), '&'))).intValue()],BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i >>> n[6])),Long.getLong(Integer.toString(n[4])), '&'))).intValue()],BA[Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(i)),Long.getLong(Integer.toString(n[4])), '&'))).intValue()]);
@@ -316,18 +311,16 @@ abstract class Base64 {
 	 */
 	static int findEnd(final byte[] sArr, final int start) {
 		int n = 0xff;
-		int ret = sArr.length;
-		for (int i = start; i < ret; i++) {
+		for (int i = start; i < sArr.length; i++) {
 			if (IA[Integer.getInteger(
 					Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sArr[i])).longValue(),
 							Long.getLong(Integer.toString(n)).longValue(), '&')))
 					.intValue()] < 0) {
-				ret=i;
-				break;
+				return i;
 			}
 
 		}
-		return ret;
+		return sArr.length;
 	}
 
 	// Follow the limit for number of statements in a method
@@ -413,13 +406,10 @@ abstract class Base64 {
 	 * @return
 	 */
 	private static byte[] limitStatements6For2(int int1, int int2, int int3, final byte[] dArr) {
-		byte[] toReturn = null;
-		if (int1 >= int2) {
-			toReturn = dArr;
-			int index = int1;
-			for (int r = 16; int1 < int2; r -= 8) {
-				toReturn[index++] = limitStatements3Bitwise(int3, r).toString().getBytes().clone()[0];
-			}
+		byte[] toReturn = dArr;
+		int index = int1;
+		for (int r = 16; int1 < int2; r -= 8) {
+			toReturn[index++] = limitStatements3Bitwise(int3, r).toString().getBytes().clone()[0];
 		}
 		return toReturn;
 	}
@@ -439,7 +429,7 @@ abstract class Base64 {
 		}
 		return toReturn;
 	}
-
+	
 	/**
 	 * 
 	 * @param dArr
@@ -450,10 +440,12 @@ abstract class Base64 {
 	 */
 	private static byte[] limitStatements8(byte[] dArr, Integer d, final byte[] sArr, int sIx) {
 		byte[] copyOfDARR = dArr;
-		copyOfDARR[d++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), SIXTEEN).toString().getBytes()
+		int i = d;
+		copyOfDARR[i++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), SIXTEEN).toString().getBytes()
 				.clone()[0];
-		copyOfDARR[d++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), EIGHT).toString().getBytes().clone()[0];
-		copyOfDARR[d++] = limitStatements2(sArr, sIx).byteValue();
+		copyOfDARR[i++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), EIGHT).toString().getBytes().clone()[0];
+		copyOfDARR[i++] = limitStatements2(sArr, sIx).byteValue();
+		d=i;
 		return copyOfDARR;
 	}
 
@@ -509,6 +501,13 @@ abstract class Base64 {
 		return b1 && b2;
 	}
 	
+	/**
+	 * 
+	 * @param sepCnt
+	 * @param cc
+	 * @param sIx
+	 * @return
+	 */
 	private static int sIxReturn (int sepCnt, Integer cc, int sIx) {
 		return (cyclomaticAND(sepCnt > 0, ++cc == 19)) ? sIx + 2 : sIx;
 	}
