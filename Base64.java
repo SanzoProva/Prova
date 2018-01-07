@@ -87,7 +87,11 @@ import java.util.Arrays;
  * @version 2.2
  * @author Mikael Grev Date: 2004-aug-02 Time: 11:31:11
  */
-
+/**
+ * 
+ * @author MaxiBon
+ *
+ */
 abstract class Base64 {
 
 	/**
@@ -140,6 +144,13 @@ abstract class Base64 {
 		}
 	}
 
+	/**
+	 * 
+	 * @param sArr
+	 * @param dArr
+	 * @param start
+	 * @return
+	 */
 	static int encodeToChar(byte[] sArr, char[] dArr, final int start) {
 		final int sLen = sArr.length;
 		final int[] n = { 0xff, 16, 8, 18, 0x3f, 12, 6 };
@@ -173,6 +184,13 @@ abstract class Base64 {
 		return dLen;
 	}
 
+	/**
+	 * 
+	 * @param sArr
+	 * @param stream
+	 * @return
+	 * @throws IOException
+	 */
 	static int encodeToBytes(byte[] sArr, JsonStream stream) throws IOException {
 		final int sLen = sArr.length;
 		final int[] n = { 0xff, 16, 8, 18, 0x3f, 12, 6, 10, 2 };
@@ -202,6 +220,12 @@ abstract class Base64 {
 		return dLen;
 	}
 
+	/**
+	 * 
+	 * @param bits
+	 * @param stream
+	 * @throws IOException
+	 */
 	static void encodeLongBits(long bits, JsonStream stream) throws IOException {
 		int n = 0x3f;
 		Long l = bits;
@@ -254,6 +278,12 @@ abstract class Base64 {
 		stream.write(b1, b2, b3, c.toString().getBytes().clone()[0]);
 	}
 
+	/**
+	 * 
+	 * @param iter
+	 * @return
+	 * @throws IOException
+	 */
 	static long decodeLongBits(JsonIterator iter) throws IOException {
 		int[] n = { 46, 6, 12, 24, 18 };
 		Slice slice = iter.readStringAsSlice();
@@ -277,6 +307,12 @@ abstract class Base64 {
 		return bits;
 	}
 
+	/**
+	 * 
+	 * @param sArr
+	 * @param start
+	 * @return
+	 */
 	static int findEnd(final byte[] sArr, final int start) {
 		int n = 0xff;
 		for (int i = start; i < sArr.length; i++) {
@@ -374,10 +410,13 @@ abstract class Base64 {
 	 * @return
 	 */
 	private static byte[] limitStatements6For2(int int1, int int2, int int3, final byte[] dArr) {
-		byte[] toReturn = dArr;
-		int index = int1;
-		for (int r = 16; int1 < int2; r -= 8) {
-			toReturn[index++] = limitStatements3Bitwise(int3, r).toString().getBytes().clone()[0];
+		byte[] toReturn = null;
+		if (int1 >= int2) {
+			toReturn = dArr;
+			int index = int1;
+			for (int r = 16; int1 < int2; r -= 8) {
+				toReturn[index++] = limitStatements3Bitwise(int3, r).toString().getBytes().clone()[0];
+			}
 		}
 		return toReturn;
 	}
@@ -396,6 +435,23 @@ abstract class Base64 {
 			toReturn = dArr;
 		}
 		return toReturn;
+	}
+
+	/**
+	 * 
+	 * @param dArr
+	 * @param d
+	 * @param sArr
+	 * @param sIx
+	 * @return
+	 */
+	private static byte[] limitStatements8(byte[] dArr, Integer d, final byte[] sArr, int sIx) {
+		byte[] copyOfDARR = dArr;
+		copyOfDARR[d++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), SIXTEEN).toString().getBytes()
+				.clone()[0];
+		copyOfDARR[d++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), EIGHT).toString().getBytes().clone()[0];
+		copyOfDARR[d++] = limitStatements2(sArr, sIx).byteValue();
+		return copyOfDARR;
 	}
 
 	/**
@@ -424,18 +480,29 @@ abstract class Base64 {
 		int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
 		byte[] dArr = new byte[len]; // Preallocate byte[] of exact length
 		// Decode all but the last 0 - 2 bytes.
-		int d = 0;
+		Integer d = 0;
 		int eLen = (len / 3) * 3;
-		for (int cc = 0; d < eLen;) {
+		int cc=0;
+		while(d<eLen) {
 			// Assemble three bytes into an int from four "valid" characters. // Add the bytes
-			dArr[d++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), SIXTEEN).toString().getBytes().clone()[0];
-			dArr[d++] = limitStatements3Bitwise(limitStatements2(sArr, sIx), EIGHT).toString().getBytes().clone()[0];
-			dArr[d++] = limitStatements2(sArr, sIx).byteValue();
+			dArr = limitStatements8(dArr, d, sArr, sIx);
 			// If line separator, jump over it.
-			sIx = (sepCnt > 0 && ++cc == 19) ? sIx + 2 : sIx;
-			cc = (sepCnt > 0 && cc == 19) ? 0 : cc;
+			sIx = (cyclomaticAND(sepCnt > 0, ++cc == 19)) ? sIx + 2 : sIx;
+			cc = (cyclomaticAND(sepCnt > 0, cc == 19)) ? 0 : cc;
 		}
-		dArr = (d < len) ? limitStatements6For2(d, len, limitStatements5For(sIx, eIx, pad, sArr), dArr) : null;
+		if (d < len){
+			dArr = limitStatements6For2(d, len, limitStatements5For(sIx, eIx, pad, sArr), dArr);
+		}
 		return limitStatements7(byteArr, dArr);
+	}
+	
+	/**
+	 * 
+	 * @param b1
+	 * @param b2
+	 * @return
+	 */
+	private static boolean cyclomaticAND (boolean b1, boolean b2) {
+		return b1 && b2;
 	}
 }
