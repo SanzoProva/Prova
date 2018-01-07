@@ -252,21 +252,18 @@ class CodegenImplNative {
 	 */
 	public static String getTypeName(Type fieldType) {
 		String ret = "";
-		boolean ist =(fieldType instanceof Class);
-		boolean ist2 = (fieldType instanceof ParameterizedType);
-		boolean ist4 = (fieldType instanceof WildcardType);
-		if (ist) {
+		boolean ist = (fieldType instanceof WildcardType);
+		if (fieldType instanceof Class) {
 			Class clazz = (Class) fieldType;
 			ret = clazz.getCanonicalName();
-		} else if (ist2) {
+		} else if (fieldType instanceof ParameterizedType) {
 			ParameterizedType pType = (ParameterizedType) fieldType;
-			boolean ist3 =(pType.getRawType() instanceof Class);
 			Class clazz = null;
-			if (ist3) {
+			if (pType.getRawType() instanceof Class) {
 				clazz = (Class) pType.getRawType();
 			}
 			ret = clazz.getCanonicalName();
-		} else if (ist4) {
+		} else if (ist) {
 			ret = Object.class.getCanonicalName();
 		} else {
 			throw new JsonException("unsupported type: " + fieldType);
@@ -401,7 +398,7 @@ class CodegenImplNative {
 			decoder = JsoniterSpi.getDecoder(cK);
 			boolean b1 = valueType instanceof Class;
 			boolean b2 = (valueType instanceof WildcardType);
-			if (b1) {
+			if (valueType instanceof Class) {
 				toReturn1 = limitStatements(decoder, b1, b2, (Class) valueType);
 			}
 			toReturn2 = limitStatements2(cK);
