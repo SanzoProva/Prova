@@ -52,6 +52,18 @@ class CodegenImplNative {
 	 * Err4
 	 */
 	static final String ERR4 = "err4";
+	/**
+	 * must implement BooleanDecoder
+	 */
+	private static final String ERRB = "must implement Decoder.BooleanDecoder";
+	/**
+	 * must implement ShortDecoder
+	 */
+	private static final String ERRS = "must implement Decoder.ShortDecoder";
+	/**
+	 * must implement IntDecoder
+	 */
+	private static final String ERRI = "must implement Decoder.IntDecoder";
 
 	/**
 	 * default private constructor
@@ -239,21 +251,23 @@ class CodegenImplNative {
 	 * @return
 	 */
 	public static String getTypeName(Type fieldType) {
+		String ret = "";
 		if (fieldType instanceof Class) {
 			Class clazz = (Class) fieldType;
-			return clazz.getCanonicalName();
+			ret = clazz.getCanonicalName();
 		} else if (fieldType instanceof ParameterizedType) {
 			ParameterizedType pType = (ParameterizedType) fieldType;
 			Class clazz = null;
 			if (pType.getRawType() instanceof Class) {
 				clazz = (Class) pType.getRawType();
 			}
-			return clazz.getCanonicalName();
+			ret = clazz.getCanonicalName();
 		} else if (fieldType instanceof WildcardType) {
-			return Object.class.getCanonicalName();
+			ret = Object.class.getCanonicalName();
 		} else {
 			throw new JsonException("unsupported type: " + fieldType);
 		}
+		return ret;
 	}
 
 	/**
@@ -327,18 +341,18 @@ class CodegenImplNative {
 	 * @param cK
 	 * @return
 	 */
-	private static String limitStatements4(Type vT, Decoder d, String cK) {
-		String s = (vT == int.class) ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
+	private static String limitStatements4(boolean b1, boolean b2, boolean b3, boolean b4, Decoder d, String cK) {
+		String s = b1 ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
 		String err = "must implement Decoder.IntDecoder";
 		limitStatement3If(ERR1,s,cK, err);
-		if (vT == long.class) {
+		if (b2) {
 			s = limitStatements5(d, s, cK, err);
 		}
 		err = "must implement Decoder.LongDecoder";
-		s = (vT == float.class) ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
+		s = b3 ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
 		err = "must implement Decoder.FloatDecoder";
 		limitStatement3If(ERR3,s,cK, err);
-		s = (vT == double.class) ? (d instanceof Decoder.DoubleDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
+		s = b4 ? (d instanceof Decoder.DoubleDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
 		err = "must implement Decoder.DoubleDecoder";
 		limitStatement3If(ERR4,s,cK, err);	
 		return s;
@@ -371,32 +385,30 @@ class CodegenImplNative {
 		Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
 		String toReturn1 = "null1";
 		String toReturn2 = "null2";
-/*1*/		if (decoder == null) {
+		String cK = cacheKey; // Avoid modifications on method or constructor parameters
+		if (decoder == null) {
 			// if cache key is for field, and there is no field decoder
 			// specified
 			// update cache key for normal type
-			cacheKey = TypeLiteral.create(valueType).getDecoderCacheKey();
-			decoder = JsoniterSpi.getDecoder(cacheKey);
+			cK = TypeLiteral.create(valueType).getDecoderCacheKey();
+			decoder = JsoniterSpi.getDecoder(cK);
 			boolean b1 = valueType instanceof Class;
-			boolean b2 = valueType instanceof WildcardType;
-			if(valueType instanceof Class) {
-				toReturn1 = limitStatements(decoder, b1, b2, (Class) valueType);
+			if (valueType instanceof Class) {
+				toReturn1 = limitStatements(decoder, b1, (valueType instanceof WildcardType), (Class) valueType);
 			}
-			toReturn2 = limitStatements2(cacheKey);
-		}		
-		String toReturn3 = cyclomaticSupp((valueType == boolean.class), ((decoder instanceof Decoder.BooleanDecoder) == false),ERR1, String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cacheKey), NULL3);
-		String err = "must implement Decoder.BooleanDecoder";
-		limitStatement3If(ERR1,toReturn3,cacheKey, err);
-		toReturn3 = cyclomaticSupp((valueType == byte.class), ((decoder instanceof Decoder.ShortDecoder) == false), ERR2, String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKey), NULL3);	
-		err =  "must implement Decoder.ShortDecoder";
-		limitStatement3If(ERR2,toReturn3,cacheKey, err);
-		toReturn3 = cyclomaticSupp((valueType == short.class), ((decoder instanceof Decoder.ShortDecoder) == false), ERR3, String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cacheKey), NULL3);
-		limitStatement3If(ERR3,toReturn3,cacheKey, err);
-		toReturn3 = cyclomaticSupp((valueType == char.class),((decoder instanceof Decoder.IntDecoder) == false), ERR4, String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cacheKey), NULL3);
-		err =  "must implement Decoder.IntDecoder";
-		limitStatement3If(ERR4,toReturn3,cacheKey, err);
-		return "null1".equals(toReturn1) ? "null2".equals(toReturn2) ? "null3".equals(toReturn3) ? "null4".equals(limitStatements4(valueType, decoder, cacheKey)) ? String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cacheKey) : limitStatements4(valueType, decoder, cacheKey) : toReturn3 : toReturn2 : toReturn1;
+			toReturn2 = limitStatements2(cK);
+		}
+		String toReturn3 = cyclomaticSupp((valueType == boolean.class), ((decoder instanceof Decoder.BooleanDecoder) == false),ERR1, String.format("com.jsoniter.CodegenAccess.readBoolean(\"%s\", iter)", cK), NULL3);
+		limitStatement3If(ERR1,toReturn3,cK, ERRB);
+		toReturn3 = cyclomaticSupp((valueType == byte.class), ((decoder instanceof Decoder.ShortDecoder) == false), ERR2, String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cK), NULL3);	
+		limitStatement3If(ERR2,toReturn3,cK, ERRS);
+		toReturn3 = cyclomaticSupp((valueType == short.class), ((decoder instanceof Decoder.ShortDecoder) == false), ERR3, String.format("com.jsoniter.CodegenAccess.readShort(\"%s\", iter)", cK), NULL3);
+		limitStatement3If(ERR3,toReturn3,cK, ERRS);
+		toReturn3 = cyclomaticSupp((valueType == char.class),((decoder instanceof Decoder.IntDecoder) == false), ERR4, String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK), NULL3);
+		limitStatement3If(ERR4,toReturn3,cK, ERRI);
+		return "null1".equals(toReturn1) ? "null2".equals(toReturn2) ? "null3".equals(toReturn3) ? "null4".equals(limitStatements4((valueType == int.class),(valueType == long.class),(valueType == float.class),(valueType == double.class), decoder, cK)) ? String.format("com.jsoniter.CodegenAccess.read(\"%s\", iter)", cK) : limitStatements4((valueType == int.class),(valueType == long.class),(valueType == float.class),(valueType == double.class), decoder, cK) : toReturn3 : toReturn2 : toReturn1;
 	}
+	
 	/**
 	 * 
 	 * @param b1
@@ -407,6 +419,9 @@ class CodegenImplNative {
 	 * @return
 	 */
 	private static String cyclomaticSupp(boolean b1, boolean b2, String err, String ok, String nullo) {
+		ERRB.toString();
+		ERRS.toString();
+		ERRI.toString();
 		return b1?b2?err:ok:nullo;
 	}
 }
