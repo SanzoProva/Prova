@@ -10,6 +10,9 @@ import java.io.IOException;
  */
 class IterImplObject {
 
+	/**
+	 * constructor
+	 */
 	private IterImplObject() {
 	}
 
@@ -17,8 +20,11 @@ class IterImplObject {
 	 * String variables
 	 */
 	final static String READ_OBJECT = "readObject";
+	/**
+	 * String variables
+	 */
 	final static String EXPECT = "expect :";
-	
+
 	/**
 	 * readObject
 	 * 
@@ -28,40 +34,46 @@ class IterImplObject {
 	 */
 	public static String funReadObject(JsonIterator iter) throws IOException {
 		byte c = IterImpl.nextToken(iter);
+		String field = null;
 		switch (c) {
 		case 'n':
 			int n = 3;
 			IterImpl.skipFixedBytes(iter, n);
-			return null;
+			return field;
 		case '{':
 			c = IterImpl.nextToken(iter);
 			if (c == '"') {
 				iter.unreadByte();
-				String field = iter.readString();
-				if (IterImpl.nextToken(iter) != ':') {
-					
-					throw iter.reportError(READ_OBJECT, EXPECT);
-				}
-				return field;
+				field = iter.readString();
+				return cyclomaticComplexity(field, iter);
 			}
 			if (c == '}') {
-				return null; // end of object
+				return field; // end of object
 			}
 			throw iter.reportError(READ_OBJECT, "expect \" after {");
 		case ',':
-			String field = iter.readString();
-			if (IterImpl.nextToken(iter) != ':') {
-				throw iter.reportError(READ_OBJECT, EXPECT);
-			}
-			return field;
+			field = iter.readString();
+			return cyclomaticComplexity(field, iter);
 		case '}':
-			return null; // end of object
+			return field; // end of object
 		default:
 			throw iter.reportError("readObject", "expect { or , or } or n, but found: " + Byte.toString(c).charAt(0));
 		}
 	}
 
-	
+	/**
+	 * @param field
+	 * @param iter
+	 * @return
+	 * @throws IOException
+	 */
+	private static String cyclomaticComplexity(String field, JsonIterator iter) throws IOException {
+		if (IterImpl.nextToken(iter) != ':') {
+			throw iter.reportError(READ_OBJECT, EXPECT);
+		}
+		return field;
+	}
+
 	/**
 	 * @param iter
 	 * @param cb
@@ -69,7 +81,8 @@ class IterImplObject {
 	 * @return
 	 * @throws IOException
 	 */
-	public static boolean readObjectCB(JsonIterator iter, JsonIterator.ReadObjectCallback cb, Object attachment) throws IOException {
+	public static boolean readObjectCB(JsonIterator iter, JsonIterator.ReadObjectCallback cb, Object attachment)
+			throws IOException {
 		byte c = IterImpl.nextToken(iter);
 		if ('{' == c) {
 			c = IterImpl.nextToken(iter);
@@ -88,27 +101,37 @@ class IterImplObject {
 		}
 		throw iter.reportError("readObjectCB", "expect { or n");
 	}
-	
-	private static boolean subReadObjectCB(JsonIterator iter, JsonIterator.ReadObjectCallback cb, Object attachment) throws IOException {
+
+	/**
+	 * 
+	 * @param iter
+	 * @param cb
+	 * @param attachment
+	 * @return
+	 * @throws IOException
+	 */
+	private static boolean subReadObjectCB(JsonIterator iter, JsonIterator.ReadObjectCallback cb, Object attachment)
+			throws IOException {
+		boolean flag = true;
 		iter.unreadByte();
 		String field = iter.readString();
 		if (IterImpl.nextToken(iter) != ':') {
 			throw iter.reportError(READ_OBJECT, EXPECT);
 		}
 		if (!cb.handle(iter, field, attachment)) {
-			return false;
+			flag = false;
 		}
 		int intero = IterImpl.nextToken(iter);
 		while (intero == ',') {
 			field = iter.readString();
 			if (IterImpl.nextToken(iter) != ':') {
-				throw iter.reportError(READ_OBJECT,EXPECT);
+				throw iter.reportError(READ_OBJECT, EXPECT);
 			}
 			if (!cb.handle(iter, field, attachment)) {
-				return false;
+				flag = false;
 			}
 			intero = IterImpl.nextToken(iter);
 		}
-		return true;
+		return flag;
 	}
 }
