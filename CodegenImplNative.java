@@ -252,17 +252,21 @@ class CodegenImplNative {
 	 */
 	public static String getTypeName(Type fieldType) {
 		String ret = "";
-		if (fieldType instanceof Class) {
+		boolean ist =(fieldType instanceof Class);
+		boolean ist2 = (fieldType instanceof ParameterizedType);
+		boolean ist4 = (fieldType instanceof WildcardType);
+		if (ist) {
 			Class clazz = (Class) fieldType;
 			ret = clazz.getCanonicalName();
-		} else if (fieldType instanceof ParameterizedType) {
+		} else if (ist2) {
 			ParameterizedType pType = (ParameterizedType) fieldType;
+			boolean ist3 =(pType.getRawType() instanceof Class);
 			Class clazz = null;
-			if (pType.getRawType() instanceof Class) {
+			if (ist3) {
 				clazz = (Class) pType.getRawType();
 			}
 			ret = clazz.getCanonicalName();
-		} else if (fieldType instanceof WildcardType) {
+		} else if (ist4) {
 			ret = Object.class.getCanonicalName();
 		} else {
 			throw new JsonException("unsupported type: " + fieldType);
@@ -342,17 +346,20 @@ class CodegenImplNative {
 	 * @return
 	 */
 	private static String limitStatements4(boolean b1, boolean b2, boolean b3, boolean b4, Decoder d, String cK) {
-		String s = b1 ? (d instanceof Decoder.IntDecoder) == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
+		boolean ist = (d instanceof Decoder.IntDecoder);
+		String s = b1 ? ist == false ? ERR1 : String.format("com.jsoniter.CodegenAccess.readInt(\"%s\", iter)", cK) : NULL4;
 		String err = "must implement Decoder.IntDecoder";
 		limitStatement3If(ERR1,s,cK, err);
 		if (b2) {
 			s = limitStatements5(d, s, cK, err);
 		}
 		err = "must implement Decoder.LongDecoder";
-		s = b3 ? (d instanceof Decoder.FloatDecoder) == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
+		ist = (d instanceof Decoder.FloatDecoder);
+		s = b3 ? ist == false ? ERR3 : String.format("com.jsoniter.CodegenAccess.readFloat(\"%s\", iter)", cK) : NULL4;
 		err = "must implement Decoder.FloatDecoder";
 		limitStatement3If(ERR3,s,cK, err);
-		s = b4 ? (d instanceof Decoder.DoubleDecoder) == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
+		ist = (d instanceof Decoder.DoubleDecoder);
+		s = b4 ? ist == false ? ERR4 : String.format("com.jsoniter.CodegenAccess.readDouble(\"%s\", iter)", cK) : NULL4;
 		err = "must implement Decoder.DoubleDecoder";
 		limitStatement3If(ERR4,s,cK, err);	
 		return s;
@@ -393,8 +400,9 @@ class CodegenImplNative {
 			cK = TypeLiteral.create(valueType).getDecoderCacheKey();
 			decoder = JsoniterSpi.getDecoder(cK);
 			boolean b1 = valueType instanceof Class;
-			if (valueType instanceof Class) {
-				toReturn1 = limitStatements(decoder, b1, (valueType instanceof WildcardType), (Class) valueType);
+			boolean b2 = (valueType instanceof WildcardType);
+			if (b1) {
+				toReturn1 = limitStatements(decoder, b1, b2, (Class) valueType);
 			}
 			toReturn2 = limitStatements2(cK);
 		}
