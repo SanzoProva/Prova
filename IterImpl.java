@@ -45,8 +45,8 @@ class IterImpl {
 			}
 		}
 		long hash = 0x811c9dc5;
-		int i = iter.head;
-		for (; i < iter.tail; i++) {
+		int i = 0;
+		for (i = iter.head; i < iter.tail; i++) {
 			byte c = iter.buf[i];
 			if (c == '"') {
 				break;
@@ -60,7 +60,8 @@ class IterImpl {
 				throw iter.reportError("readObjectFieldAsHash", "expect :");
 			}
 		}
-		return (int) hash;
+		Long intero = hash;
+		return intero.intValue();
 	}
 
 	public static final Slice readObjectFieldAsSlice(JsonIterator iter) throws IOException {
@@ -193,10 +194,13 @@ class IterImpl {
 			byte c = iter.buf[i++];
 			switch (c) {
 			case ' ':
+				break;
 			case '\n':
+				break;
 			case '\r':
+				break;
 			case '\t':
-				continue;
+				break;
 			default:
 				iter.head = i;
 				return c;
@@ -284,11 +288,11 @@ class IterImpl {
 	 * @param bc
 	 * @return
 	 */
-	private static void funReadStringSlowPathSupp(boolean isExpectingLowSurrogate, char bc) {
+	private static void funReadStringSlowPathSupp(boolean isExpectingLowSurrogate, char bc, boolean iselsANDbH) {
 		boolean bool = isExpectingLowSurrogate;
 		boolean bH = Character.isHighSurrogate(bc);
 		boolean bL = Character.isLowSurrogate(bc);
-		boolean b1 = (bool && bH);
+		boolean b1 = iselsANDbH;
 		boolean b2 = (!bool && bL);
 		if (b1 || b2) {
 			throw new JsonException("invalid surrogate");
@@ -360,9 +364,9 @@ class IterImpl {
 	 * @param i
 	 * @return
 	 */
-	private static int funReadStringSlowPathSupp5(int bc, JsonIterator iter, String stringa2,
-			boolean isExpectingLowSurrogate, Integer i) {
+	private static int funReadStringSlowPathSupp5(int bc, JsonIterator iter, String stringa2, boolean isExpectingLowSurrogate, Integer i) {
 		int bChar = bc;
+		char bca = (char) bChar;
 		if (bChar == 'b') {
 			bChar = '\b';
 		} else if (bChar == 't') {
@@ -375,23 +379,26 @@ class IterImpl {
 			bChar = '\r';
 		} else if (bChar == 'u') {
 			bChar = (IterImplString.translateHex(iter.buf[i++]) << 12) + (IterImplString.translateHex(iter.buf[i++]) << 8) + (IterImplString.translateHex(iter.buf[i++]) << 4) + IterImplString.translateHex(iter.buf[i++]);
-			funReadStringSlowPathSupp(isExpectingLowSurrogate, (char) bChar); 
+			funReadStringSlowPathSupp(isExpectingLowSurrogate, bca, isExpectingLowSurrogate && Character.isHighSurrogate(bca)); 
 		} else {
 			throw iter.reportError(READSTRINGSLOWPATH, stringa2 + bChar);
 		}
 		return bChar;
 	}
 
-	private static Map<JsonIterator, Integer> iterImplSupp(int bc, final int[] n, JsonIterator iter, int u3, int u2,
-			int i, int j) {
+	private static Map<JsonIterator, Integer> iterImplSupp(int bc, final int[] n, JsonIterator iter, int u3, int u2, int i, int j) {
 		Map<JsonIterator, Integer> support = new TreeMap<JsonIterator, Integer>();
-		if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
-				Long.getLong(Integer.toString(n[4])).longValue(), '&'))).intValue()) == 0xE0) {
-			bc = iterImplSupp(bc, n, u3, u2, i);
+		if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),Long.getLong(Integer.toString(n[4])).longValue(), '&'))).intValue()) == 0xE0) {
+			bc = ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),Long.getLong(Integer.toString(n[5])).longValue(), '&'))).intValue()) << 12) + ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(),Long.getLong(Integer.toString(n[3])).longValue(), '&'))).intValue()) << 6) + (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u3)).longValue(),Long.getLong(Integer.toString(n[3])).longValue(), '&'))).intValue());
 			support.put(iter, bc);
 			return support;
 		} else {
-			bc = iterImplSupport(iter, bc, i, u3, u2, n);
+			final int u4 = iter.buf[i++];
+			if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),Long.getLong(Integer.toString(n[6])).longValue(), '&'))).intValue()) == 0xF0) {
+				bc = ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),Long.getLong(Integer.toString(n[7])).longValue(), '&'))).intValue()) << 18) + ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(),Long.getLong(Integer.toString(n[3])).longValue(), '&'))).intValue()) << 12) + ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u3)).longValue(),Long.getLong(Integer.toString(n[3])).longValue(), '&'))).intValue()) << 6) + (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u4)).longValue(),Long.getLong(Integer.toString(n[3])).longValue(), '&'))).intValue());
+			} else {
+				throw iter.reportError(READSTRINGSLOWPATH, "invalid unicode character");
+			}
 			iter = iterImplSupp(iter, bc, n, u3, u2, i, j);
 			support.put(iter, bc);
 			return support;
@@ -412,66 +419,17 @@ class IterImpl {
 				System.arraycopy(iter.reusableChars, 0, newBuf, 0, iter.reusableChars.length);
 				iter.reusableChars = newBuf;
 			}
-			Integer a = (Integer
-					.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(),
-							Long.getLong(Integer.toString(n[8])).longValue(), '&')))
-					.intValue() + +0xdc00);
+			Integer a = (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(),Long.getLong(Integer.toString(n[8])).longValue(), '&'))).intValue() + +0xdc00);
 			iter.reusableChars[j++] = a.toString().toCharArray()[0];
 			if (iter.reusableChars.length == j) {
 				char[] newBuf = new char[iter.reusableChars.length * 2];
 				System.arraycopy(iter.reusableChars, 0, newBuf, 0, iter.reusableChars.length);
 				iter.reusableChars = newBuf;
 			}
-			Integer b = (Integer
-					.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(),
-							Long.getLong(Integer.toString(n[8])).longValue(), '&')))
-					.intValue() + 0xdc00);
+			Integer b = (Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(sup)).longValue(),Long.getLong(Integer.toString(n[8])).longValue(), '&'))).intValue() + 0xdc00);
 			iter.reusableChars[j++] = b.toString().toCharArray()[0];
 		}
 		return iter;
-	}
-
-	private static int iterImplSupp(int bc, final int[] n, int u3, int u2, int i) {
-		return bc = ((Integer
-				.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
-						Long.getLong(Integer.toString(n[5])).longValue(), '&')))
-				.intValue()) << 12)
-				+ ((Integer
-						.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(),
-								Long.getLong(Integer.toString(n[3])).longValue(), '&')))
-						.intValue()) << 6)
-				+ (Integer
-						.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u3)).longValue(),
-								Long.getLong(Integer.toString(n[3])).longValue(), '&')))
-						.intValue());
-	}
-
-	public static int iterImplSupport(JsonIterator iter, int bc, int i, int u3, int u2, final int[] n) {
-		final int u4 = iter.buf[i++];
-
-		if ((Integer.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
-				Long.getLong(Integer.toString(n[6])).longValue(), '&'))).intValue()) == 0xF0) {
-			bc = ((Integer
-					.getInteger(Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(bc)).longValue(),
-							Long.getLong(Integer.toString(n[7])).longValue(), '&')))
-					.intValue()) << 18)
-					+ ((Integer.getInteger(
-							Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u2)).longValue(),
-									Long.getLong(Integer.toString(n[3])).longValue(), '&')))
-							.intValue()) << 12)
-					+ ((Integer.getInteger(
-							Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u3)).longValue(),
-									Long.getLong(Integer.toString(n[3])).longValue(), '&')))
-							.intValue()) << 6)
-					+ (Integer.getInteger(
-							Long.toString(SupportBitwise.bitwise(Long.getLong(Integer.toString(u4)).longValue(),
-									Long.getLong(Integer.toString(n[3])).longValue(), '&')))
-							.intValue());
-		} else {
-			throw iter.reportError(READSTRINGSLOWPATH, "invalid unicode character");
-		}
-
-		return bc;
 	}
 
 	public static int updateStringCopyBound(final int bound) {
@@ -573,34 +531,52 @@ class IterImpl {
 			IterImplForStreaming.assertNotLeadingZero(iter);
 			return 0;
 		}
-
-		return IterImplForStreaming.readLongSlowPath(iter, supportReadInt(iter, (int) ind));
+		Long intero = ind;
+		return IterImplForStreaming.readLongSlowPath(iter, supportReadInt(iter, intero.intValue()));
 	}
 
 	static final double readDouble(final JsonIterator iter) throws IOException {
+		double toReturn = 0.0d;
 		int oldHead = iter.head;
+		JsonIterator iterCopy = iter;
 		try {
 			try {
-				long value = IterImplNumber.readLong(iter);
-				if (iter.head == iter.tail) {
+				long value = IterImplNumber.readLong(iterCopy);
+				if (iterCopy.head == iterCopy.tail) {
 					return value;
 				}
-				byte c = iter.buf[iter.head];
-				if (c == '.') {
-					return readDoubleSupp(c, iter, value, oldHead);
-				} else {
-					return value;
-				}
+				byte c = iterCopy.buf[iterCopy.head];
+				return supp(c , iterCopy, value, oldHead);
 			} finally {
-				if (iter.head < iter.tail && (iter.buf[iter.head] == 'e' || iter.buf[iter.head] == 'E')) {
-					iter.head = oldHead;
-					return IterImplForStreaming.readDoubleSlowPath(iter);
+				if (iterCopy.head < iterCopy.tail && (iterCopy.buf[iterCopy.head] == 'e' || iterCopy.buf[iterCopy.head] == 'E')) {
+					iterCopy.head = oldHead;
+					toReturn = IterImplForStreaming.readDoubleSlowPath(iterCopy);
 				}
 			}
 		} catch (JsonException e) {
 			iter.head = oldHead;
-			return IterImplForStreaming.readDoubleSlowPath(iter);
+			toReturn = IterImplForStreaming.readDoubleSlowPath(iterCopy);
 		}
+		return toReturn;
+	}
+	
+	/**
+	 * 
+	 * @param c
+	 * @param iter
+	 * @param value
+	 * @param oldHead
+	 * @return
+	 * @throws IOException
+	 */
+	private static double supp(byte c , JsonIterator iter, long value, int oldHead) throws IOException {
+		double d = 0.0d;
+		if (c == '.') {
+			d = readDoubleSupp(c, iter, value, oldHead);
+		} else {
+			d =  value;
+		}
+		return d;
 	}
 
 	/**
@@ -615,21 +591,22 @@ class IterImpl {
 	 */
 	private static double readDoubleSupp(byte c, final JsonIterator iter, long value, int oldHead) throws IOException {
 		byte b = c;
-		iter.head++;
-		int start = iter.head;
-		b = iter.buf[iter.head++];
-		long decimalPart = readLong(iter, b);
+		JsonIterator iterCopy = iter;
+		iterCopy.head++;
+		int start = iterCopy.head;
+		b = iterCopy.buf[iterCopy.head++];
+		long decimalPart = readLong(iterCopy, b);
 		if (decimalPart == Long.MIN_VALUE) {
-			return IterImplForStreaming.readDoubleSlowPath(iter);
+			return IterImplForStreaming.readDoubleSlowPath(iterCopy);
 		}
 		decimalPart = -decimalPart;
-		int decimalPlaces = iter.head - start;
-		if (decimalPlaces > 0 && decimalPlaces < IterImplNumber.POW10.length && (iter.head - oldHead) < 10) {
+		int decimalPlaces = iterCopy.head - start;
+		if (decimalPlaces > 0 && decimalPlaces < IterImplNumber.POW10.length && (iterCopy.head - oldHead) < 10) {
 			BigDecimal number = new BigDecimal(IterImplNumber.POW10[decimalPlaces]);
 			return value + (decimalPart / number.floatValue());
 		} else {
-			iter.head = oldHead;
-			return IterImplForStreaming.readDoubleSlowPath(iter);
+			iterCopy.head = oldHead;
+			return IterImplForStreaming.readDoubleSlowPath(iterCopy);
 		}
 	}
 }
